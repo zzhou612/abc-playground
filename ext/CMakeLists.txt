@@ -1,0 +1,16 @@
+include(ExternalProject)
+
+set(abc_src ${CMAKE_BINARY_DIR}/ext/install_abc-prefix/src)
+
+externalproject_add(install_abc
+        DOWNLOAD_DIR .
+        HG_REPOSITORY https://bitbucket.org/alanmi/abc
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND make ABC_USE_NAMESPACE=abc libabc.a
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND rsync --include "*.h" --filter "hide,! */" -avm ${abc_src}/install_abc/src/ ${ext_include}/ COMMAND cp ${abc_src}/install_abc/libabc.a ${ext_lib}/libabc.a
+        LOG_DOWNLOAD 1
+        LOG_BUILD 1
+        LOG_INSTALL 1)
+
+set(abc_libraries ${ext_lib}/libabc.a dl pthread readline PARENT_SCOPE)
