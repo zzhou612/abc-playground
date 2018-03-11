@@ -1,5 +1,11 @@
 include(ExternalProject)
 
+set(ext_include ${PROJECT_SOURCE_DIR}/ext/include)
+set(ext_include ${PROJECT_SOURCE_DIR}/ext/include PARENT_SCOPE)
+
+set(ext_lib ${PROJECT_SOURCE_DIR}/ext/lib)
+set(ext_lib ${PROJECT_SOURCE_DIR}/ext/lib PARENT_SCOPE)
+
 set(abc_src ${CMAKE_BINARY_DIR}/ext/install_abc-prefix/src)
 
 externalproject_add(install_abc

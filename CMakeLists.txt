@@ -7,11 +7,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_definitions(-DPROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 
-set(ext_include ${PROJECT_SOURCE_DIR}/ext/include)
-set(ext_lib ${PROJECT_SOURCE_DIR}/ext/lib)
+add_subdirectory(ext)
+add_subdirectory(ectl)
+add_subdirectory(playground)
 
 file(MAKE_DIRECTORY ${ext_include})
 file(MAKE_DIRECTORY ${ext_lib})
-
-add_subdirectory(ext)
-add_subdirectory(playground)

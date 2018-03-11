@@ -1,4 +1,4 @@
-# Benchmark "C17.blif" written by ABC on Wed Mar  7 08:47:04 2018
+# Benchmark "C17.blif" written by ABC on Sun Mar 11 16:53:07 2018
 .model C17.blif
 .inputs G1gat G2gat G3gat G6gat G7gat
 .outputs G22gat G23gat
