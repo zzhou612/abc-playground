@@ -8,6 +8,9 @@ set(ext_lib ${PROJECT_SOURCE_DIR}/ext/lib PARENT_SCOPE)
 
 set(abc_src ${CMAKE_BINARY_DIR}/ext/install_abc-prefix/src)
 
+file(MAKE_DIRECTORY ${ext_include})
+file(MAKE_DIRECTORY ${ext_lib})
+
 externalproject_add(install_abc
         DOWNLOAD_DIR .
         HG_REPOSITORY https://bitbucket.org/alanmi/abc
