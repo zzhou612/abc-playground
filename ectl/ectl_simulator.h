@@ -1,12 +1,12 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
-#include "abc_api.h"
-#include "ectl_types.h"
+#include <ectl_utils.h>
+#include <ectl_types.h>
 
 namespace ECTL {
-    void ComSimSopOnce(Network pNtk);
-    void PrintSimRes(Network pNtk);
+    double SimError(Network origin, Network approx, int simu_time = 100000);
+    void SimTest(Network ntk);
 }
 
 #endif

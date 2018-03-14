@@ -7,21 +7,22 @@ using namespace boost::filesystem;
 int main(int argc, char *argv[]) {
     path project_source_dir(PROJECT_SOURCE_DIR);
     path benchmark_dir = project_source_dir / "benchmark";
-    path iblif = benchmark_dir / "C17.blif";
+    path iblif_origin = benchmark_dir / "C17.blif";
+    path iblif_approx = benchmark_dir / "C17.blif.approx";
 
-    Frame abc;
-    Network ntk;
+    Frame abc = ECTL::StartAbc();
+    Network ntk_origin = ECTL::ReadBlif(iblif_origin.string());
+    Network ntk_approx = ECTL::ReadBlif(iblif_approx.string());
 
-    abc = ECTL::StartAbc();
-    ntk = ECTL::ReadBlif(iblif.string());
+    ECTL::ShowNetworkInfo(ntk_origin);
+    ECTL::SimTest(ntk_origin);
 
-    ECTL::ShowNetworkInfo(ntk);
+    ECTL::ShowNetworkInfo(ntk_approx);
+    ECTL::SimTest(ntk_approx);
 
-    ECTL::ComSimSopOnce(ntk);
-    ECTL::PrintSimRes(ntk);
+    std::cout << ECTL::SimError(ntk_origin, ntk_approx) << std::endl;
 
-    ECTL::DeleteNetwork(ntk);
+    ECTL::DeleteNetwork(ntk_origin);
     ECTL::StopABC();
     return 0;
 }
-

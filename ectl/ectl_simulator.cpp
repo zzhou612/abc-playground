@@ -1,57 +1,76 @@
-#include "ectl_simulator.h"
+#include <random>
+#include <chrono>
+#include <functional>
+
+#include <ectl_simulator.h>
+
+namespace abc {
+    int Abc_ObjSopSimulate(Abc_Obj_t *pObj);
+}
 
 namespace ECTL {
-    void ComSimSopOnce(Network pNtk) {
-        ObjVector vNodes;
-        Object pObj;
-        int i;
-        assert(Abc_NtkIsSopLogic(pNtk));
-        srand((unsigned) time(nullptr));
 
-        // initialize PI values
-        Abc_NtkForEachPi(pNtk, pObj, i) {
-            pObj->pCopy = (Object) (abc::ABC_PTRUINT_T) (rand() & 1);
+    double SimError(Network origin_ntk, Network approx_ntk, int simu_time) {
+        std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
+        std::uniform_int_distribution<int> distribution(0, 1);
+        auto dice = std::bind(distribution, generator);
+        assert(Abc_NtkIsSopLogic(origin_ntk));
+        assert(Abc_NtkIsSopLogic(approx_ntk));
+
+        int err = 0;
+        for (int _ = 0; _ < simu_time; ++_) {
+            std::vector<Object> origin_pis = GetPrimaryInputs(origin_ntk);
+            std::vector<Object> approx_pis = GetPrimaryInputs(approx_ntk);
+
+            for (int i = 0; i < (int) origin_pis.size(); i++)
+                origin_pis[i]->iTemp = approx_pis[i]->iTemp = dice();
+
+            for (auto node : TopologicalSort(origin_ntk))
+                node->iTemp = abc::Abc_ObjSopSimulate(node);
+            for (auto po : GetPrimaryOutputs(origin_ntk))
+                po->iTemp = Abc_ObjFanin0(po)->iTemp;
+
+            for (auto node : TopologicalSort(approx_ntk))
+                node->iTemp = abc::Abc_ObjSopSimulate(node);
+            for (auto po : GetPrimaryOutputs(approx_ntk))
+                po->iTemp = Abc_ObjFanin0(po)->iTemp;
+
+            std::vector<Object> origin_pos = GetPrimaryOutputs(origin_ntk);
+            std::vector<Object> approx_pos = GetPrimaryOutputs(approx_ntk);
+            for (int i = 0; i < (int) origin_pos.size(); i++) {
+                if (origin_pos[i]->iTemp != approx_pos[i]->iTemp) {
+                    err++;
+                    break;
+                }
+            }
         }
+        return (double) err / (double) simu_time;
 
-        // get the topological sequence of internal nodes
-        vNodes = Abc_NtkDfs(pNtk, 0);
-
-        // simulate internal nodes
-        Vec_PtrForEachEntry(Object, vNodes, pObj, i) {
-            pObj->pCopy = (Object) (abc::ABC_PTRUINT_T) abc::Abc_ObjSopSimulate(pObj);
-        }
-
-        // bring the results to the POs
-        Abc_NtkForEachPo(pNtk, pObj, i) {
-            pObj->pCopy = Abc_ObjFanin0(pObj)->pCopy;
-        }
-
-        Vec_PtrFree(vNodes);
     }
 
-    void PrintSimRes(Network pNtk) {
-        Object pObj;
-        int i;
-        // PI values
-        abc::Abc_Print(1, "Primary Inputs:\n");
-        Abc_NtkForEachPi(pNtk, pObj, i) {
-            abc::Abc_Print(1, "%s=%d ", Abc_ObjName(pObj), (abc::ABC_PTRUINT_T) (pObj->pCopy));
-        }
-        abc::Abc_Print(1, "\n");
+    void SimTest(Network ntk) {
+        std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
+        std::uniform_int_distribution<int> distribution(0, 1);
+        auto dice = std::bind(distribution, generator);
 
-        // internal values
-        abc::Abc_Print(1, "Internal Nodes (Including POs):\n");
-        Abc_NtkForEachNode(pNtk, pObj, i) {
-                abc::Abc_Print(1, "%s=%d ", Abc_ObjName(pObj), (abc::ABC_PTRUINT_T) (pObj->pCopy));
-            }
-        abc::Abc_Print(1, "\n");
+        assert(Abc_NtkIsSopLogic(ntk));
+        for (auto pi : GetPrimaryInputs(ntk))
+            pi->iTemp = dice();
+        for (auto node : TopologicalSort(ntk))
+            node->iTemp = abc::Abc_ObjSopSimulate(node);
+        for (auto po : GetPrimaryOutputs(ntk))
+            po->iTemp = Abc_ObjFanin0(po)->iTemp;
 
-        // PO values
-        abc::Abc_Print(1, "Primary Outputs:\n");
-        Abc_NtkForEachPo(pNtk, pObj, i) {
-            abc::Abc_Print(1, "%s=%d ", Abc_ObjName(pObj), (abc::ABC_PTRUINT_T) (pObj->pCopy));
-        }
-        abc::Abc_Print(1, "\n");
-
+        std::cout << "Performing simulation test (one round) for " << GetNetworkName(ntk) << ":\n";
+        std::cout << "Primary inputs:\n";
+        for (auto pi : GetPrimaryInputs(ntk))
+            std::cout << GetNodeName(pi) << "=" << pi->iTemp << " ";
+        std::cout << "\nInternal nodes (including primary outputs):\n";
+        for (auto node: GetInternalNodes(ntk))
+            std::cout << GetNodeName(node) << "=" << node->iTemp << " ";
+        std::cout << "\nPrimary outputs:\n";
+        for (auto po : GetPrimaryOutputs(ntk))
+            std::cout << GetNodeName(po) << "=" << po->iTemp << " ";
+        std::cout << std::endl;
     }
 }
