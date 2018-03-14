@@ -13,4 +13,4 @@ add_executable(abc_playground main.cpp)
 target_link_libraries(abc_playground
         ectl
         ${abc_libraries}
-        Boost::filesystem)
+        ${Boost_LIBRARIES})

@@ -61,6 +61,50 @@ namespace ECTL {
     void DeleteNetwork(Network ntk) {
         abc::Abc_NtkDelete(ntk);
     }
+
+    std::vector<Object> TopologicalSort(Network ntk) {
+        abc::Vec_Ptr_t *nodes = abc::Abc_NtkDfs(ntk, 0);
+        std::vector<Object> sorted_nodes;
+        for (int i = 0; i < nodes->nSize; ++i) {
+            auto obj = (Object) nodes->pArray[i];
+            sorted_nodes.emplace_back(obj);
+        }
+        Vec_PtrFree(nodes);
+        return sorted_nodes;
+    }
+
+    std::vector<Object> GetPrimaryInputs(Network ntk) {
+        std::vector<Object> pis;
+        Object obj;
+        int i;
+        Abc_NtkForEachPi(ntk, obj, i) {
+            pis.emplace_back(obj);
+        }
+        return pis;
+    }
+
+    std::vector<Object> GetPrimaryOutputs(Network ntk) {
+        std::vector<Object> pos;
+        Object obj;
+        int i;
+        Abc_NtkForEachPo(ntk, obj, i) {
+            pos.emplace_back(obj);
+        }
+        return pos;
+    }
+
+    std::vector<Object> GetInternalNodes(Network ntk) {
+        std::vector<Object> nodes;
+        Object obj;
+        int i;
+        Abc_NtkForEachNode(ntk, obj, i) {
+                nodes.emplace_back(obj);
+            }
+        return nodes;
+    }
+
+    std::string GetNodeName(Object obj) {
+        return std::string(Abc_ObjName(obj));
+    }
+
 }
-
-
