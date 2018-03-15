@@ -19,8 +19,8 @@ namespace ECTL {
 
         int err = 0;
         for (int _ = 0; _ < simu_time; ++_) {
-            std::vector<Object> origin_pis = GetPrimaryInputs(origin_ntk);
-            std::vector<Object> approx_pis = GetPrimaryInputs(approx_ntk);
+            std::vector<Node> origin_pis = GetPrimaryInputs(origin_ntk);
+            std::vector<Node> approx_pis = GetPrimaryInputs(approx_ntk);
 
             for (int i = 0; i < (int) origin_pis.size(); i++)
                 origin_pis[i]->iTemp = approx_pis[i]->iTemp = dice();
@@ -35,8 +35,8 @@ namespace ECTL {
             for (auto po : GetPrimaryOutputs(approx_ntk))
                 po->iTemp = Abc_ObjFanin0(po)->iTemp;
 
-            std::vector<Object> origin_pos = GetPrimaryOutputs(origin_ntk);
-            std::vector<Object> approx_pos = GetPrimaryOutputs(approx_ntk);
+            std::vector<Node> origin_pos = GetPrimaryOutputs(origin_ntk);
+            std::vector<Node> approx_pos = GetPrimaryOutputs(approx_ntk);
             for (int i = 0; i < (int) origin_pos.size(); i++) {
                 if (origin_pos[i]->iTemp != approx_pos[i]->iTemp) {
                     err++;

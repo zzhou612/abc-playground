@@ -12,6 +12,8 @@ namespace ECTL {
 
     Network ReadBlif(std::string ifile);
 
+    void WriteBlif(Network ntk, std::string ofile);
+
     std::string GetNetworkName(Network ntk);
 
     void ShowNetworkInfo(Network ntk);
@@ -20,15 +22,23 @@ namespace ECTL {
 
     void DeleteNetwork(Network ntk);
 
-    std::vector<Object> TopologicalSort(Network ntk);
+    std::vector<Node> TopologicalSort(Network ntk);
 
-    std::vector<Object> GetPrimaryInputs(Network ntk);
+    std::vector<Node> GetPrimaryInputs(Network ntk);
 
-    std::vector<Object> GetPrimaryOutputs(Network ntk);
+    std::vector<Node> GetPrimaryOutputs(Network ntk);
 
-    std::vector<Object> GetInternalNodes(Network ntk);
+    std::vector<Node> GetInternalNodes(Network ntk);
 
-    std::string GetNodeName(Object obj);
+    Node GetNodebyName(Network ntk, std::string name);
+
+    std::string GetNodeName(Node node);
+
+    std::vector<Node> GetFanins(Node node);
+
+    std::vector<Node> GetFanouts(Node node);
+
+    std::vector<Node> GetMFFC(Node node);
 
 }
 
