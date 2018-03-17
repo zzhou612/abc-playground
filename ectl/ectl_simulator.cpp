@@ -14,8 +14,8 @@ namespace ECTL {
         std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> distribution(0, 1);
         auto dice = std::bind(distribution, generator);
-        assert(Abc_NtkIsSopLogic(origin_ntk));
-        assert(Abc_NtkIsSopLogic(approx_ntk));
+        assert(abc::Abc_NtkIsSopLogic(origin_ntk));
+        assert(abc::Abc_NtkIsSopLogic(approx_ntk));
 
         int err = 0;
         for (int _ = 0; _ < simu_time; ++_) {
@@ -26,14 +26,14 @@ namespace ECTL {
                 origin_pis[i]->iTemp = approx_pis[i]->iTemp = dice();
 
             for (auto node : TopologicalSort(origin_ntk))
-                node->iTemp = abc::Abc_ObjSopSimulate(node);
+                node->iTemp = SopSimulate(node);
             for (auto po : GetPrimaryOutputs(origin_ntk))
-                po->iTemp = Abc_ObjFanin0(po)->iTemp;
+                po->iTemp = GetFanin0(po)->iTemp;
 
             for (auto node : TopologicalSort(approx_ntk))
-                node->iTemp = abc::Abc_ObjSopSimulate(node);
+                node->iTemp = SopSimulate(node);
             for (auto po : GetPrimaryOutputs(approx_ntk))
-                po->iTemp = Abc_ObjFanin0(po)->iTemp;
+                po->iTemp = GetFanin0(po)->iTemp;
 
             std::vector<Node> origin_pos = GetPrimaryOutputs(origin_ntk);
             std::vector<Node> approx_pos = GetPrimaryOutputs(approx_ntk);
@@ -53,13 +53,13 @@ namespace ECTL {
         std::uniform_int_distribution<int> distribution(0, 1);
         auto dice = std::bind(distribution, generator);
 
-        assert(Abc_NtkIsSopLogic(ntk));
+        assert(abc::Abc_NtkIsSopLogic(ntk));
         for (auto pi : GetPrimaryInputs(ntk))
             pi->iTemp = dice();
         for (auto node : TopologicalSort(ntk))
-            node->iTemp = abc::Abc_ObjSopSimulate(node);
+            node->iTemp = SopSimulate(node);
         for (auto po : GetPrimaryOutputs(ntk))
-            po->iTemp = Abc_ObjFanin0(po)->iTemp;
+            po->iTemp = GetFanin0(po)->iTemp;
 
         std::cout << "Performing simulation test (one round) for " << GetNetworkName(ntk) << ":\n";
         std::cout << "Primary inputs:\n";

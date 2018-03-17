@@ -36,9 +36,19 @@ namespace ECTL {
 
     std::vector<Node> GetFanins(Node node);
 
+    Node GetFanin0(Node node);
+
+    Node GetFanin1(Node node);
+
     std::vector<Node> GetFanouts(Node node);
 
-    std::vector<Node> GetMFFC(Node node);
+    int SopSimulate(Node node);
+
+    void PrintMFFC(Node node);
+
+    std::vector<Node> GetMFFCNodes(Node node);
+
+    Network CreateMFFCNetwork(Network ntk, Node node);
 
 }
 
