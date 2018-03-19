@@ -10,6 +10,8 @@ namespace ECTL {
 
     void StopABC();
 
+    Network DuplicateNetwork(Network ntk);
+
     Network ReadBlif(std::string ifile);
 
     void WriteBlif(Network ntk, std::string ofile);
@@ -32,6 +34,8 @@ namespace ECTL {
 
     Node GetNodebyName(Network ntk, std::string name);
 
+    Network GetHostNetwork(Node node);
+
     std::string GetNodeName(Node node);
 
     std::vector<Node> GetFanins(Node node);
@@ -42,13 +46,17 @@ namespace ECTL {
 
     std::vector<Node> GetFanouts(Node node);
 
+    Node CreateConstNode(Network ntk, int constant);
+
+    void ReplaceNode(Node old_node, Node new_node);
+
     int SopSimulate(Node node);
 
     void PrintMFFC(Node node);
 
     std::vector<Node> GetMFFCNodes(Node node);
 
-    Network CreateMFFCNetwork(Network ntk, Node node);
+    Network CreateMFFCNetwork(Node node);
 
 }
 

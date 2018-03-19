@@ -4,6 +4,7 @@
 
 using namespace boost::filesystem;
 using namespace ECTL;
+using namespace std;
 
 int main(int argc, char *argv[]) {
     path project_source_dir(PROJECT_SOURCE_DIR);
@@ -22,30 +23,31 @@ int main(int argc, char *argv[]) {
 
     Node node_n307 = GetNodebyName(ntk_c880, "n307");
     PrintMFFC(node_n307);
-    Network ntk_mffc = CreateMFFCNetwork(ntk_c880, node_n307);
+    Network ntk_mffc = CreateMFFCNetwork(node_n307);
     ShowNetworkInfo(ntk_mffc);
 
-    std::cout<< "PIs: ";
-    for(auto node:GetPrimaryInputs(ntk_mffc))
-        std::cout << GetNodeName(node) << " ";
+    cout << "PIs: ";
+    for (auto node:GetPrimaryInputs(ntk_mffc))
+        cout << GetNodeName(node) << " ";
     std::cout << std::endl << "Internal nodes: ";
-    for(auto node:GetInternalNodes(ntk_mffc))
-        std::cout << GetNodeName(node) << " ";
+    for (auto node:GetInternalNodes(ntk_mffc))
+        cout << GetNodeName(node) << " ";
     std::cout << std::endl << "POs: ";
-    for(auto node:GetPrimaryOutputs(ntk_mffc))
-        std::cout << GetNodeName(node) << " ";
-    std::cout << std::endl;
+    for (auto node:GetPrimaryOutputs(ntk_mffc))
+        cout << GetNodeName(node) << " ";
+    cout << std::endl;
 
     Network ntk_origin = ReadBlif(iblif_c17.string());
-    Network ntk_approx = ReadBlif(iblif_c17_approx.string());
 
-    ShowNetworkInfo(ntk_origin);
+    Network ntk_approx = DuplicateNetwork(ntk_origin);
+    Node g11 = GetNodebyName(ntk_approx, "G11gat");
+    ReplaceNode(g11, CreateConstNode(ntk_approx, 1));
+    WriteBlif(ntk_approx, iblif_c17_approx.string());
+
     SimTest(ntk_origin);
-
-    ShowNetworkInfo(ntk_approx);
     SimTest(ntk_approx);
 
-    std::cout << ECTL::SimError(ntk_origin, ntk_approx) << std::endl;
+    cout << SimError(ntk_origin, ntk_approx) << endl;
 
     DeleteNetwork(ntk_origin);
     DeleteNetwork(ntk_approx);
