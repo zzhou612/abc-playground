@@ -34,6 +34,10 @@ namespace ECTL {
 
     Node GetNodebyName(Network ntk, std::string name);
 
+    Node GetNodebyID(Network ntk, int id);
+
+    int GetNodeID(Node node);
+
     Network GetHostNetwork(Node node);
 
     std::string GetNodeName(Node node);
@@ -45,6 +49,14 @@ namespace ECTL {
     Node GetFanin1(Node node);
 
     std::vector<Node> GetFanouts(Node node);
+
+    Node GetFanout0(Node node);
+
+    bool IsPrimaryInput(Node node);
+
+    bool IsPrimaryOutput(Node node);
+
+    bool IsNode(Node node);
 
     Node CreateConstNode(Network ntk, int constant);
 

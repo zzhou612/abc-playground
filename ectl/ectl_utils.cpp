@@ -265,6 +265,14 @@ namespace ECTL {
         return abc::Abc_NtkFindNode(ntk, (char *) name.c_str());
     }
 
+    Node GetNodebyID(Network ntk, int id) {
+        return abc::Abc_NtkObj(ntk, id);
+    }
+
+    int GetNodeID(Node node) {
+        return abc::Abc_ObjId(node);
+    }
+
     Network GetHostNetwork(Node node) {
         return abc::Abc_ObjNtk(node);
     }
@@ -309,6 +317,22 @@ namespace ECTL {
             fan_outs.emplace_back(fan_out);
         }
         return fan_outs;
+    }
+
+    Node GetFanout0(Node node) {
+        return abc::Abc_ObjFanout0(node);
+    }
+
+    bool IsPrimaryInput(Node node) {
+        return (bool) abc::Abc_ObjIsPi(node);
+    }
+
+    bool IsPrimaryOutput(Node node) {
+        return (bool) abc::Abc_ObjIsPo(node);
+    }
+
+    bool IsNode(Node node) {
+        return (bool) abc::Abc_ObjIsNode(node);
     }
 
     Node CreateConstNode(Network ntk, int constant) {
