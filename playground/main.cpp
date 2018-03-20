@@ -24,8 +24,8 @@ std::tuple<std::map<Node, double>, std::map<Node, int> > GetNodeError(Network nt
     std::map<Node, int> approx_constant;
 
     for (auto node : GetSortedNodes(ntk))
-        if(IsPrimaryInput(node) || IsPrimaryOutput(GetFanout0(node))) {
-            node_error[node] =INF_PROB;
+        if (IsPrimaryInput(node) || IsPrimaryOutput(GetFanout0(node))) {
+            node_error[node] = INF_PROB;
             approx_constant[node] = 0;
         } else {
             Network ntk_approx = DuplicateNetwork(ntk);
@@ -58,18 +58,20 @@ int main(int argc, char *argv[]) {
     path c880 = benchmark_dir / "C880.blif";
     path c1908 = benchmark_dir / "C1908.blif";
 
-    Frame abc = ECTL::StartAbc();
+    Frame abc = StartAbc();
 
     Network ntk = ReadBlif(c1908.string());
 
+    Network ntk_origin = DuplicateNetwork(ntk);
+
     Network ntk_approx = DuplicateNetwork(ntk);
 
-    std::vector<Node> sorted_nodes = GetSortedNodes(ntk);
-    std::map<Node, double> node_error;
-    std::map<Node, int> approx_constant;
+    vector<Node> sorted_nodes = GetSortedNodes(ntk);
+    map<Node, double> node_error;
+    map<Node, int> approx_constant;
 
-    std::tie(node_error, approx_constant) = GetNodeError(ntk);
-    std::vector<Node> min_cut = MinCut(ntk, node_error);
+    tie(node_error, approx_constant) = GetNodeError(ntk);
+    vector<Node> min_cut = MinCut(ntk, node_error);
 
     cout << "Min Cut: ";
     for (auto node : min_cut) {
@@ -81,6 +83,8 @@ int main(int argc, char *argv[]) {
     cout << "MFFC:" << endl;
     for( auto node : min_cut)
         PrintMFFC(node);
+
+    // C1908
 //    KMostCriticalPaths(ntk);
 //    std::vector<std::string> const_0_nodes{"n312", "n346", "n377", "n385", "n390", "n398"};
 //    for (const auto &node_name : const_0_nodes) {
@@ -90,7 +94,20 @@ int main(int argc, char *argv[]) {
 //    cout << SimError(ntk, ntk_approx) << endl;
 //    KMostCriticalPaths(ntk_approx);
 
+
+    // C880
+//    KMostCriticalPaths(ntk);
+//    std::vector<std::string> const_0_nodes{"n140"};
+//    for (const auto &node_name : const_0_nodes) {
+//        Node node_approx = GetNodebyName(ntk_approx, node_name);
+//        ReplaceNode(node_approx, CreateConstNode(ntk_approx, 0));
+//    }
+//    cout << SimError(ntk, ntk_approx) << endl;
+//    KMostCriticalPaths(ntk_approx);
+
     DeleteNetwork(ntk);
+    DeleteNetwork(ntk_origin);
+    DeleteNetwork(ntk_approx);
 
     StopABC();
     return 0;

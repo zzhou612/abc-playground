@@ -328,7 +328,14 @@ namespace ECTL {
     }
 
     bool IsPrimaryOutput(Node node) {
-        return (bool) abc::Abc_ObjIsPo(node);
+        return (bool)abc::Abc_ObjIsPo(node);
+    }
+
+    bool IsPrimaryOutputNode(Node node) {
+        for (auto fan_out : GetFanouts(node))
+            if(IsPrimaryOutput(fan_out))
+                return true;
+        return false;
     }
 
     bool IsNode(Node node) {

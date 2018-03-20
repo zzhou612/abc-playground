@@ -56,6 +56,8 @@ namespace ECTL {
 
     bool IsPrimaryOutput(Node node);
 
+    bool IsPrimaryOutputNode(Node node);
+
     bool IsNode(Node node);
 
     Node CreateConstNode(Network ntk, int constant);

@@ -173,7 +173,7 @@ std::map<Node, int> CalculateSlack(const Network ntk) {
     }
     /* Update rat */
     for (Node &node : boost::adaptors::reverse(sorted_nodes)) {
-        if (IsPrimaryOutput(GetFanout0(node)))
+        if (IsPrimaryOutputNode(node))
             required_time.at(node) = max_at;
         else
             for (const auto fan_out:GetFanouts(node))
@@ -194,7 +194,7 @@ void KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
     for (auto node : sorted_nodes)
         max_delay_to_sink.insert(std::pair<Node, int>(node, 0));
     for (Node &node : boost::adaptors::reverse(sorted_nodes)) {
-        if (IsPrimaryOutput(GetFanout0(node)))
+        if (IsPrimaryOutputNode(node))
             max_delay_to_sink.at(node) = 1;
         else
             for (auto fan_out:GetFanouts(node))
@@ -208,7 +208,7 @@ void KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
         return a.max_delay_to_sink > b.max_delay_to_sink;
     };
     for (auto node: sorted_nodes)
-        if (!IsPrimaryOutput(GetFanout0(node))) {
+        if (!IsPrimaryOutputNode(node)) {
             std::vector<T_Node> t_fan_outs;
             std::vector<Node> fan_outs;
 
@@ -233,7 +233,7 @@ void KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
     while (!paths.empty() && k > 0) {
         PartialPath t_path = paths.top();
         paths.pop();
-        if (IsPrimaryOutput(GetFanout0(t_path.path.back()))) {
+        if (IsPrimaryOutputNode(t_path.path.back())) {
             k--;
             std::cout << "Delay: " << t_path.max_delay << "\t";
             for (const auto &node : t_path.path) {
@@ -271,7 +271,7 @@ std::vector<Node> MinCut(const Network ntk, std::map<Node, double> error) {
             dinic.AddEdge(u, u + N, error.at(node));
             for (auto &fan_out:GetFanouts(node)) {
                 if (IsPrimaryOutput(fan_out))
-                    break;
+                    continue;
                 if (slack.at(fan_out) == 0) {
                     int v = GetNodeID(fan_out);
                     dinic.AddEdge(u + N, v, INF);
@@ -281,7 +281,7 @@ std::vector<Node> MinCut(const Network ntk, std::map<Node, double> error) {
             if(IsPrimaryInput(node))
                 dinic.AddEdge(source + N, u, INF);
 
-            if(IsPrimaryOutput(GetFanout0(node)))
+            if(IsPrimaryOutputNode(node))
                 dinic.AddEdge(u + N, sink, INF);
         }
     }
