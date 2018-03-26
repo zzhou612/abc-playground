@@ -180,6 +180,8 @@ namespace ECTL {
 
     Network DuplicateNetwork(Network ntk) {
         return abc::ECTL_Abc_NtkDup(ntk);
+//        return abc::Abc_NtkDup(ntk);
+
     }
 
     Network ReadBlif(std::string ifile) {

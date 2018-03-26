@@ -77,7 +77,7 @@ struct Dinic {
 
     double DFS(int u, int T, double flow = -1) {
         if (u == T || flow == 0) return flow;
-        for (int &i = pt[u]; i < g[u].size(); ++i) {
+        for (int &i = pt[u]; i < (int) g[u].size(); ++i) {
             Edge &e = E[g[u][i]];
             Edge &oe = E[g[u][i] ^ 1];
             if (d[e.v] == d[e.u] + 1) {
@@ -163,8 +163,8 @@ std::map<Node, int> CalculateSlack(const Network ntk) {
     int max_at = -1 * INF;
     /* Update at */
     for (auto node : sorted_nodes) {
-        if (GetFanins(node).empty())
-            arrival_time.at(node) = 0;
+        if (IsPrimaryInput(node))
+            arrival_time.at(node) = 1;
         else
             for (const auto fan_in:GetFanins(node))
                 arrival_time.at(node) = std::max(arrival_time.at(node), arrival_time.at(fan_in) + 1);
@@ -172,17 +172,20 @@ std::map<Node, int> CalculateSlack(const Network ntk) {
             max_at = arrival_time.at(node);
     }
     /* Update rat */
-    for (Node &node : boost::adaptors::reverse(sorted_nodes)) {
+    for (auto node : sorted_nodes)
         if (IsPrimaryOutputNode(node))
             required_time.at(node) = max_at;
-        else
-            for (const auto fan_out:GetFanouts(node))
+    for (Node &node : boost::adaptors::reverse(sorted_nodes)) {
+        for (const auto fan_out:GetFanouts(node))
+            if (!IsPrimaryOutput(fan_out))
                 required_time.at(node) = std::min(required_time.at(node), required_time.at(fan_out) - 1);
     }
     /* Update slack */
-    for (auto node:sorted_nodes)
+    for (auto node:sorted_nodes) {
+//        std::cout << GetNodeName(node) << "=" << required_time.at(node) << "-" << arrival_time.at(node) << " ";
         slack.at(node) = required_time.at(node) - arrival_time.at(node);
-
+    }
+//    std::cout << std::endl;
     return slack;
 }
 
@@ -191,13 +194,14 @@ void KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
     std::vector<Node> sorted_nodes = GetSortedNodes(ntk);
     std::map<Node, int> max_delay_to_sink;
     /* Computation of Maximum Delays to Sink */
-    for (auto node : sorted_nodes)
+    for (auto node : sorted_nodes) {
         max_delay_to_sink.insert(std::pair<Node, int>(node, 0));
-    for (Node &node : boost::adaptors::reverse(sorted_nodes)) {
         if (IsPrimaryOutputNode(node))
             max_delay_to_sink.at(node) = 1;
-        else
-            for (auto fan_out:GetFanouts(node))
+    }
+    for (Node &node : boost::adaptors::reverse(sorted_nodes)) {
+        for (auto fan_out:GetFanouts(node))
+            if (!IsPrimaryOutput(fan_out))
                 max_delay_to_sink.at(node) = std::max(
                         max_delay_to_sink.at(node),
                         max_delay_to_sink.at(fan_out) + 1);
@@ -207,21 +211,24 @@ void KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
     auto t_comp = [](T_Node a, T_Node b) {
         return a.max_delay_to_sink > b.max_delay_to_sink;
     };
-    for (auto node: sorted_nodes)
-        if (!IsPrimaryOutputNode(node)) {
-            std::vector<T_Node> t_fan_outs;
-            std::vector<Node> fan_outs;
 
-            for (const auto &fan_out:GetFanouts(node))
+    for (auto node: sorted_nodes) {
+        std::vector<T_Node> t_fan_outs;
+        std::vector<Node> fan_outs;
+
+        for (const auto &fan_out:GetFanouts(node))
+            if (!IsPrimaryOutput(fan_out))
                 t_fan_outs.emplace_back(T_Node(fan_out, max_delay_to_sink.at(fan_out)));
+            else
+                t_fan_outs.emplace_back(T_Node(fan_out, 0));
 
-            std::sort(t_fan_outs.begin(), t_fan_outs.end(), t_comp);
+        std::sort(t_fan_outs.begin(), t_fan_outs.end(), t_comp);
 
-            for (const auto &t_fan_out:t_fan_outs)
-                fan_outs.emplace_back(t_fan_out.node);
+        for (const auto &t_fan_out:t_fan_outs)
+            fan_outs.emplace_back(t_fan_out.node);
 
-            SetFanouts(node, fan_outs);
-        }
+        SetFanouts(node, fan_outs);
+    }
 
     /* Path Enumeration */
     auto comp = [](PartialPath a, PartialPath b) { return a.max_delay < b.max_delay; };
@@ -233,25 +240,109 @@ void KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
     while (!paths.empty() && k > 0) {
         PartialPath t_path = paths.top();
         paths.pop();
-        if (IsPrimaryOutputNode(t_path.path.back())) {
+        if (IsPrimaryOutput(t_path.path.back())) {
             k--;
-            std::cout << "Delay: " << t_path.max_delay << "\t";
+            std::cout << "Delay: " << t_path.max_delay << " ";
+            t_path.path.pop_back();
             for (const auto &node : t_path.path) {
                 std::cout << GetNodeName(node);
                 if (show_slack)
                     std::cout << "=" << slack.at(node);
-                std::cout << "\t";
+                std::cout << " ";
             }
             std::cout << std::endl;
         } else {
             Node node_t = t_path.path.back();
             for (const auto &successor : GetFanouts(node_t)) {
-                paths.push(PartialPath(successor,
-                                       (int) t_path.path.size() + max_delay_to_sink.at(successor),
-                                       t_path.path));
+                if (!IsPrimaryOutput(successor))
+                    paths.push(PartialPath(successor,
+                                           (int) t_path.path.size() + max_delay_to_sink.at(successor),
+                                           t_path.path));
+                else
+                    paths.push(PartialPath(successor,
+                                           (int) t_path.path.size() + 0,
+                                           t_path.path));
             }
         }
     }
+}
+
+std::vector<Path> GetCriticalPaths(Network ntk) {
+    std::vector<Path> critical_paths;
+    std::map<Node, int> slack = CalculateSlack(ntk);
+    std::vector<Node> sorted_nodes = GetSortedNodes(ntk);
+    std::map<Node, int> max_delay_to_sink;
+    /* Computation of Maximum Delays to Sink */
+    for (auto node : sorted_nodes) {
+        max_delay_to_sink.insert(std::pair<Node, int>(node, 0));
+        if (IsPrimaryOutputNode(node))
+            max_delay_to_sink.at(node) = 1;
+    }
+    for (Node &node : boost::adaptors::reverse(sorted_nodes)) {
+        for (auto fan_out:GetFanouts(node))
+            if (!IsPrimaryOutput(fan_out))
+                max_delay_to_sink.at(node) = std::max(
+                        max_delay_to_sink.at(node),
+                        max_delay_to_sink.at(fan_out) + 1);
+    }
+
+    /* Sorting the Successors of Each Vertex */
+    auto t_comp = [](T_Node a, T_Node b) {
+        return a.max_delay_to_sink > b.max_delay_to_sink;
+    };
+
+    for (auto node: sorted_nodes) {
+        std::vector<T_Node> t_fan_outs;
+        std::vector<Node> fan_outs;
+
+        for (const auto &fan_out:GetFanouts(node))
+            if (!IsPrimaryOutput(fan_out))
+                t_fan_outs.emplace_back(T_Node(fan_out, max_delay_to_sink.at(fan_out)));
+            else
+                t_fan_outs.emplace_back(T_Node(fan_out, 0));
+
+        std::sort(t_fan_outs.begin(), t_fan_outs.end(), t_comp);
+
+        for (const auto &t_fan_out:t_fan_outs)
+            fan_outs.emplace_back(t_fan_out.node);
+
+        SetFanouts(node, fan_outs);
+    }
+
+    /* Path Enumeration */
+    auto comp = [](PartialPath a, PartialPath b) { return a.max_delay < b.max_delay; };
+    std::priority_queue<PartialPath, std::vector<PartialPath>, decltype(comp)> paths(comp);
+
+    for (auto node : GetPrimaryInputs(ntk))
+        paths.push(PartialPath(node, max_delay_to_sink.at(node)));
+
+    int critical_path_delay = -1;
+    while (!paths.empty()) {
+        PartialPath t_path = paths.top();
+        paths.pop();
+        if (IsPrimaryOutput(t_path.path.back())) {
+            if (t_path.max_delay >= critical_path_delay) {
+                critical_path_delay = t_path.max_delay;
+                t_path.path.pop_back();
+                Path critical_path(t_path.path);
+                critical_paths.emplace_back(critical_path);
+            } else
+                break;
+        } else {
+            Node node_t = t_path.path.back();
+            for (const auto &successor : GetFanouts(node_t)) {
+                if (!IsPrimaryOutput(successor))
+                    paths.push(PartialPath(successor,
+                                           (int) t_path.path.size() + max_delay_to_sink.at(successor),
+                                           t_path.path));
+                else
+                    paths.push(PartialPath(successor,
+                                           (int) t_path.path.size() + 0,
+                                           t_path.path));
+            }
+        }
+    }
+    return critical_paths;
 }
 
 std::vector<Node> MinCut(const Network ntk, std::map<Node, double> error) {
@@ -259,33 +350,42 @@ std::vector<Node> MinCut(const Network ntk, std::map<Node, double> error) {
 
     auto N = (int) abc::Abc_NtkObjNum(ntk) + 2;
     Dinic dinic(N * 2);
-
+    bool is_connected[N][N];
     int source = 0, sink = N - 1;
 
-    dinic.AddEdge(source, source + N, INF);
-    dinic.AddEdge(sink, sink + N, INF);
+    memset(is_connected, 0, sizeof(is_connected[0][0]) * N * N);
 
-    for (auto node:GetSortedNodes(ntk)) {
+    for (auto node:GetSortedNodes(ntk))
         if (slack.at(node) == 0) {
             int u = GetNodeID(node);
             dinic.AddEdge(u, u + N, error.at(node));
-            for (auto &fan_out:GetFanouts(node)) {
-                if (IsPrimaryOutput(fan_out))
-                    continue;
-                if (slack.at(fan_out) == 0) {
-                    int v = GetNodeID(fan_out);
-                    dinic.AddEdge(u + N, v, INF);
-                }
+        }
+
+    std::vector<Path> critical_paths = GetCriticalPaths(ntk);
+
+    for (const auto &path : critical_paths) {
+        for (int i = 0; i < (int) path.nodes.size() - 1; i++) {
+            int u = GetNodeID(path.nodes[i]);
+            int v = GetNodeID(path.nodes[i + 1]);
+            if (!is_connected[u][v]) {
+                dinic.AddEdge(u + N, v, INF);
+                is_connected[u][v] = true;
             }
+        }
+        int front = GetNodeID(path.nodes.front());
+        if (!is_connected[source][front]) {
+            dinic.AddEdge(source, front, INF);
+            is_connected[source][front] = true;
+        }
 
-            if(IsPrimaryInput(node))
-                dinic.AddEdge(source + N, u, INF);
-
-            if(IsPrimaryOutputNode(node))
-                dinic.AddEdge(u + N, sink, INF);
+        int back = GetNodeID(path.nodes.back());
+        if (!is_connected[back][sink]) {
+            dinic.AddEdge(back + N, sink, INF);
+            is_connected[back][sink] = true;
         }
     }
 
+    std::cout << "Max Flow: " << dinic.MaxFlow(source, sink) << std::endl;
     std::vector<Edge> min_cut = dinic.MinCut(source, sink);
     std::vector<Node> min_cut_nodes;
     for (auto e:min_cut)
