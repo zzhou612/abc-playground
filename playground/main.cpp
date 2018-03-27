@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
     Network ntk_origin = ReadBlif(origin_blif.string());
     Network ntk_approx = DuplicateNetwork(ntk_origin);
     cout << "Critical paths of original circuit: " << endl;
-    KMostCriticalPaths(ntk_origin, 5);
+    KMostCriticalPaths(ntk_origin, 1);
 
     double error = 0;
     int round = 1;
@@ -97,13 +97,13 @@ int main(int argc, char *argv[]) {
             ReplaceNode(node, CreateConstNode(ntk_approx, approx_constant[node]));
 
         error = SimError(ntk_origin, ntk_approx);
-        cout << "Error: " << error << endl;
 
-        KMostCriticalPaths(ntk_approx, 5);
-        cout << endl << endl << endl;
+        KMostCriticalPaths(ntk_approx, 1);
+        cout << "Error: " << error << endl;
+        cout << endl << endl;
 
         path o_blif = approx_blif.parent_path() /
-                path(approx_blif.stem().string() + "_" + to_string(round) + approx_blif.extension().string());
+                      path(approx_blif.stem().string() + "_" + to_string(round) + approx_blif.extension().string());
         WriteBlif(ntk_approx, o_blif.string());
         DeleteNetwork(ntk_approx);
         ntk_approx = ReadBlif(o_blif.string());

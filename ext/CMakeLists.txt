@@ -13,7 +13,7 @@ file(MAKE_DIRECTORY ${ext_lib})
 
 externalproject_add(install_abc
         DOWNLOAD_DIR .
-        HG_REPOSITORY https://bitbucket.org/alanmi/abc
+        GIT_REPOSITORY https://bitbucket.org/alanmi/abc
         CONFIGURE_COMMAND ""
         BUILD_COMMAND make ABC_USE_NAMESPACE=abc libabc.a
         BUILD_IN_SOURCE 1
