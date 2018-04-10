@@ -1,0 +1,806 @@
+# Benchmark "top" written by ABC on Fri Mar 31 00:53:36 2017
+.model top
+.inputs p_127gat_18_ p_155gat_22_ p_120gat_17_ p_64gat_9_ p_106gat_15_ \
+ p_204gat_29_ p_1gat_0_ p_43gat_6_ p_85gat_12_ p_141gat_20_ p_183gat_26_ \
+ p_57gat_8_ p_148gat_21_ p_169gat_24_ p_225gat_32_ p_99gat_14_ p_230gat_37_ \
+ p_134gat_19_ p_162gat_23_ p_29gat_4_ p_78gat_11_ p_226gat_33_ p_22gat_3_ \
+ p_231gat_38_ p_36gat_5_ p_113gat_16_ p_8gat_1_ p_50gat_7_ p_227gat_34_ \
+ p_92gat_13_ p_197gat_28_ p_232gat_39_ p_233gat_40_ p_71gat_10_ \
+ p_190gat_27_ p_15gat_2_ p_228gat_35_ p_176gat_25_ p_218gat_31_ \
+ p_211gat_30_ p_229gat_36_
+.outputs p_1332gat_585_ p_1331gat_572_ p_1334gat_577_ p_1354gat_562_ \
+ p_1352gat_570_ p_1336gat_586_ p_1330gat_576_ p_1335gat_573_ p_1353gat_566_ \
+ p_1329gat_580_ p_1328gat_584_ p_1342gat_559_ p_1351gat_557_ p_1333gat_581_ \
+ p_1349gat_565_ p_1350gat_561_ p_1348gat_569_ p_1347gat_556_ p_1341gat_563_ \
+ p_1325gat_579_ p_1326gat_575_ p_1344gat_568_ p_1324gat_583_ p_1343gat_555_ \
+ p_1345gat_564_ p_1337gat_582_ p_1327gat_571_ p_1340gat_567_ p_1346gat_560_ \
+ p_1339gat_574_ p_1355gat_558_ p_1338gat_578_
+.names p_1gat_0_ p_29gat_4_ n74
+10 1
+.names p_1gat_0_ p_29gat_4_ n75
+01 1
+.names n74 n75 n76
+00 1
+.names p_225gat_32_ p_233gat_40_ n77
+11 1
+.names p_141gat_20_ p_148gat_21_ n78
+00 1
+.names p_141gat_20_ p_148gat_21_ n79
+11 1
+.names n78 n79 n80
+00 1
+.names p_155gat_22_ p_162gat_23_ n81
+10 1
+.names p_155gat_22_ p_162gat_23_ n82
+01 1
+.names n81 n82 n83
+00 1
+.names n80 n83 n84
+11 1
+.names n80 n83 n85
+00 1
+.names n84 n85 n86
+00 1
+.names n77 n86 n87
+11 1
+.names n77 n86 n88
+00 1
+.names n87 n88 n89
+00 1
+.names p_85gat_12_ p_57gat_8_ n90
+10 1
+.names p_85gat_12_ p_57gat_8_ n91
+01 1
+.names n90 n91 n92
+00 1
+.names p_120gat_17_ p_113gat_16_ n93
+00 1
+.names p_120gat_17_ p_113gat_16_ n94
+11 1
+.names n93 n94 n95
+00 1
+.names p_127gat_18_ p_134gat_19_ n96
+10 1
+.names p_127gat_18_ p_134gat_19_ n97
+01 1
+.names n96 n97 n98
+00 1
+.names n95 n98 n99
+11 1
+.names n95 n98 n100
+00 1
+.names n99 n100 n101
+00 1
+.names n92 n101 n102
+11 1
+.names n92 n101 n103
+00 1
+.names n102 n103 n104
+00 1
+.names n89 n104 n105
+10 1
+.names n89 n104 n106
+01 1
+.names n105 n106 n107
+00 1
+.names n76 n107 n108
+11 1
+.names n76 n107 n109
+00 1
+.names n108 n109 n110
+00 1
+.names p_43gat_6_ p_15gat_2_ n111
+10 1
+.names p_43gat_6_ p_15gat_2_ n112
+01 1
+.names n111 n112 n113
+00 1
+.names p_227gat_34_ p_233gat_40_ n114
+11 1
+.names n101 n114 n115
+11 1
+.names n101 n114 n116
+00 1
+.names n115 n116 n117
+00 1
+.names p_99gat_14_ p_71gat_10_ n118
+10 1
+.names p_99gat_14_ p_71gat_10_ n119
+01 1
+.names n118 n119 n120
+00 1
+.names p_169gat_24_ p_176gat_25_ n121
+00 1
+.names p_169gat_24_ p_176gat_25_ n122
+11 1
+.names n121 n122 n123
+00 1
+.names p_183gat_26_ p_190gat_27_ n124
+10 1
+.names p_183gat_26_ p_190gat_27_ n125
+01 1
+.names n124 n125 n126
+00 1
+.names n123 n126 n127
+11 1
+.names n123 n126 n128
+00 1
+.names n127 n128 n129
+00 1
+.names n120 n129 n130
+11 1
+.names n120 n129 n131
+00 1
+.names n130 n131 n132
+00 1
+.names n117 n132 n133
+10 1
+.names n117 n132 n134
+01 1
+.names n133 n134 n135
+00 1
+.names n113 n135 n136
+11 1
+.names n113 n135 n137
+00 1
+.names n136 n137 n138
+00 1
+.names n110 n138 n139
+11 1
+.names p_22gat_3_ p_50gat_7_ n140
+10 1
+.names p_22gat_3_ p_50gat_7_ n141
+01 1
+.names n140 n141 n142
+00 1
+.names p_233gat_40_ p_228gat_35_ n143
+11 1
+.names n86 n143 n144
+11 1
+.names n86 n143 n145
+00 1
+.names n144 n145 n146
+00 1
+.names p_106gat_15_ p_78gat_11_ n147
+10 1
+.names p_106gat_15_ p_78gat_11_ n148
+01 1
+.names n147 n148 n149
+00 1
+.names p_204gat_29_ p_197gat_28_ n150
+00 1
+.names p_204gat_29_ p_197gat_28_ n151
+11 1
+.names n150 n151 n152
+00 1
+.names p_218gat_31_ p_211gat_30_ n153
+10 1
+.names p_218gat_31_ p_211gat_30_ n154
+01 1
+.names n153 n154 n155
+00 1
+.names n152 n155 n156
+11 1
+.names n152 n155 n157
+00 1
+.names n156 n157 n158
+00 1
+.names n149 n158 n159
+11 1
+.names n149 n158 n160
+00 1
+.names n159 n160 n161
+00 1
+.names n146 n161 n162
+10 1
+.names n146 n161 n163
+01 1
+.names n162 n163 n164
+00 1
+.names n142 n164 n165
+11 1
+.names n142 n164 n166
+00 1
+.names n165 n166 n167
+00 1
+.names p_36gat_5_ p_8gat_1_ n168
+10 1
+.names p_36gat_5_ p_8gat_1_ n169
+01 1
+.names n168 n169 n170
+00 1
+.names p_226gat_33_ p_233gat_40_ n171
+11 1
+.names n158 n171 n172
+11 1
+.names n158 n171 n173
+00 1
+.names n172 n173 n174
+00 1
+.names p_64gat_9_ p_92gat_13_ n175
+10 1
+.names p_64gat_9_ p_92gat_13_ n176
+01 1
+.names n175 n176 n177
+00 1
+.names n129 n177 n178
+11 1
+.names n129 n177 n179
+00 1
+.names n178 n179 n180
+00 1
+.names n174 n180 n181
+10 1
+.names n174 n180 n182
+01 1
+.names n181 n182 n183
+00 1
+.names n170 n183 n184
+11 1
+.names n170 n183 n185
+00 1
+.names n184 n185 n186
+00 1
+.names n167 n186 n187
+11 1
+.names n167 n186 n188
+00 1
+.names n139 n187 n189
+10 1
+.names n188 n189 n190
+01 1
+.names n110 n138 n191
+00 1
+.names n139 n187 n192
+01 1
+.names n191 n192 n193
+01 1
+.names n190 n193 n194
+00 1
+.names p_134gat_19_ p_162gat_23_ n195
+10 1
+.names p_134gat_19_ p_162gat_23_ n196
+01 1
+.names n195 n196 n197
+00 1
+.names p_232gat_39_ p_233gat_40_ n198
+11 1
+.names p_29gat_4_ p_36gat_5_ n199
+00 1
+.names p_29gat_4_ p_36gat_5_ n200
+11 1
+.names n199 n200 n201
+00 1
+.names p_43gat_6_ p_50gat_7_ n202
+10 1
+.names p_43gat_6_ p_50gat_7_ n203
+01 1
+.names n202 n203 n204
+00 1
+.names n201 n204 n205
+11 1
+.names n201 n204 n206
+00 1
+.names n205 n206 n207
+00 1
+.names n198 n207 n208
+11 1
+.names n198 n207 n209
+00 1
+.names n208 n209 n210
+00 1
+.names p_190gat_27_ p_218gat_31_ n211
+10 1
+.names p_190gat_27_ p_218gat_31_ n212
+01 1
+.names n211 n212 n213
+00 1
+.names p_85gat_12_ p_92gat_13_ n214
+00 1
+.names p_85gat_12_ p_92gat_13_ n215
+11 1
+.names n214 n215 n216
+00 1
+.names p_106gat_15_ p_99gat_14_ n217
+10 1
+.names p_106gat_15_ p_99gat_14_ n218
+01 1
+.names n217 n218 n219
+00 1
+.names n216 n219 n220
+11 1
+.names n216 n219 n221
+00 1
+.names n220 n221 n222
+00 1
+.names n213 n222 n223
+11 1
+.names n213 n222 n224
+00 1
+.names n223 n224 n225
+00 1
+.names n210 n225 n226
+10 1
+.names n210 n225 n227
+01 1
+.names n226 n227 n228
+00 1
+.names n197 n228 n229
+11 1
+.names n197 n228 n230
+00 1
+.names n229 n230 n231
+00 1
+.names p_127gat_18_ p_155gat_22_ n232
+10 1
+.names p_127gat_18_ p_155gat_22_ n233
+01 1
+.names n232 n233 n234
+00 1
+.names p_231gat_38_ p_233gat_40_ n235
+11 1
+.names p_1gat_0_ p_8gat_1_ n236
+00 1
+.names p_1gat_0_ p_8gat_1_ n237
+11 1
+.names n236 n237 n238
+00 1
+.names p_22gat_3_ p_15gat_2_ n239
+10 1
+.names p_22gat_3_ p_15gat_2_ n240
+01 1
+.names n239 n240 n241
+00 1
+.names n238 n241 n242
+11 1
+.names n238 n241 n243
+00 1
+.names n242 n243 n244
+00 1
+.names n235 n244 n245
+11 1
+.names n235 n244 n246
+00 1
+.names n245 n246 n247
+00 1
+.names p_183gat_26_ p_211gat_30_ n248
+10 1
+.names p_183gat_26_ p_211gat_30_ n249
+01 1
+.names n248 n249 n250
+00 1
+.names p_64gat_9_ p_57gat_8_ n251
+00 1
+.names p_64gat_9_ p_57gat_8_ n252
+11 1
+.names n251 n252 n253
+00 1
+.names p_78gat_11_ p_71gat_10_ n254
+10 1
+.names p_78gat_11_ p_71gat_10_ n255
+01 1
+.names n254 n255 n256
+00 1
+.names n253 n256 n257
+11 1
+.names n253 n256 n258
+00 1
+.names n257 n258 n259
+00 1
+.names n250 n259 n260
+11 1
+.names n250 n259 n261
+00 1
+.names n260 n261 n262
+00 1
+.names n247 n262 n263
+10 1
+.names n247 n262 n264
+01 1
+.names n263 n264 n265
+00 1
+.names n234 n265 n266
+11 1
+.names n234 n265 n267
+00 1
+.names n266 n267 n268
+00 1
+.names p_120gat_17_ p_148gat_21_ n269
+10 1
+.names p_120gat_17_ p_148gat_21_ n270
+01 1
+.names n269 n270 n271
+00 1
+.names p_230gat_37_ p_233gat_40_ n272
+11 1
+.names n222 n272 n273
+11 1
+.names n222 n272 n274
+00 1
+.names n273 n274 n275
+00 1
+.names p_204gat_29_ p_176gat_25_ n276
+10 1
+.names p_204gat_29_ p_176gat_25_ n277
+01 1
+.names n276 n277 n278
+00 1
+.names n259 n278 n279
+11 1
+.names n259 n278 n280
+00 1
+.names n279 n280 n281
+00 1
+.names n275 n281 n282
+10 1
+.names n275 n281 n283
+01 1
+.names n282 n283 n284
+00 1
+.names n271 n284 n285
+11 1
+.names n271 n284 n286
+00 1
+.names n285 n286 n287
+00 1
+.names p_141gat_20_ p_113gat_16_ n288
+10 1
+.names p_141gat_20_ p_113gat_16_ n289
+01 1
+.names n288 n289 n290
+00 1
+.names p_233gat_40_ p_229gat_36_ n291
+11 1
+.names n207 n291 n292
+11 1
+.names n207 n291 n293
+00 1
+.names n292 n293 n294
+00 1
+.names p_169gat_24_ p_197gat_28_ n295
+10 1
+.names p_169gat_24_ p_197gat_28_ n296
+01 1
+.names n295 n296 n297
+00 1
+.names n244 n297 n298
+11 1
+.names n244 n297 n299
+00 1
+.names n298 n299 n300
+00 1
+.names n294 n300 n301
+10 1
+.names n294 n300 n302
+01 1
+.names n301 n302 n303
+00 1
+.names n290 n303 n304
+11 1
+.names n290 n303 n305
+00 1
+.names n304 n305 n306
+00 1
+.names n231 n268 n307
+10 1
+.names n287 n306 n308
+01 1
+.names n307 n308 n309
+11 1
+.names n194 n309 n310
+01 1
+.names n110 n310 n311
+01 1
+.names p_57gat_8_ n311 n312
+01 1
+.names p_57gat_8_ n311 n313
+10 1
+.names n312 n313 p_1332gat_585_
+00 0
+.names n194 n231 n315
+00 1
+.names n268 n287 n316
+11 1
+.names n306 n316 n317
+01 1
+.names n315 n317 n318
+11 1
+.names n167 n318 n319
+01 1
+.names p_50gat_7_ n319 n320
+01 1
+.names p_50gat_7_ n319 n321
+10 1
+.names n320 n321 p_1331gat_572_
+00 0
+.names n138 n310 n323
+01 1
+.names p_71gat_10_ n323 n324
+01 1
+.names p_71gat_10_ n323 n325
+10 1
+.names n324 n325 p_1334gat_577_
+00 0
+.names n268 n306 n327
+11 1
+.names n231 n287 n328
+11 1
+.names n231 n287 n329
+00 1
+.names n327 n328 n330
+10 1
+.names n329 n330 n331
+01 1
+.names n268 n306 n332
+00 1
+.names n327 n328 n333
+01 1
+.names n332 n333 n334
+01 1
+.names n331 n334 n335
+00 1
+.names n139 n188 n336
+11 1
+.names n335 n336 n337
+01 1
+.names n268 n337 n338
+01 1
+.names p_211gat_30_ n338 n339
+01 1
+.names p_211gat_30_ n338 n340
+10 1
+.names n339 n340 p_1354gat_562_
+00 0
+.names n306 n337 n342
+01 1
+.names p_197gat_28_ n342 n343
+01 1
+.names p_197gat_28_ n342 n344
+10 1
+.names n343 n344 p_1352gat_570_
+00 0
+.names n287 n327 n346
+01 1
+.names n315 n346 n347
+11 1
+.names n110 n347 n348
+01 1
+.names p_85gat_12_ n348 n349
+01 1
+.names p_85gat_12_ n348 n350
+10 1
+.names n349 n350 p_1336gat_586_
+00 0
+.names n138 n318 n352
+01 1
+.names p_43gat_6_ n352 n353
+01 1
+.names p_43gat_6_ n352 n354
+10 1
+.names n353 n354 p_1330gat_576_
+00 0
+.names n167 n310 n356
+01 1
+.names p_78gat_11_ n356 n357
+01 1
+.names p_78gat_11_ n356 n358
+10 1
+.names n357 n358 p_1335gat_573_
+00 0
+.names n287 n337 n360
+01 1
+.names p_204gat_29_ n360 n361
+01 1
+.names p_204gat_29_ n360 n362
+10 1
+.names n361 n362 p_1353gat_566_
+00 0
+.names n186 n318 n364
+01 1
+.names p_36gat_5_ n364 n365
+01 1
+.names p_36gat_5_ n364 n366
+10 1
+.names n365 n366 p_1329gat_580_
+00 0
+.names n110 n318 n368
+01 1
+.names p_29gat_4_ n368 n369
+01 1
+.names p_29gat_4_ n368 n370
+10 1
+.names n369 n370 p_1328gat_584_
+00 0
+.names n187 n191 n372
+11 1
+.names n335 n372 n373
+01 1
+.names n268 n373 n374
+01 1
+.names p_127gat_18_ n374 n375
+01 1
+.names p_127gat_18_ n374 n376
+10 1
+.names n375 n376 p_1342gat_559_
+00 0
+.names n110 n138 n378
+10 1
+.names n167 n186 n379
+10 1
+.names n378 n379 n380
+11 1
+.names n335 n380 n381
+01 1
+.names n231 n381 n382
+01 1
+.names p_190gat_27_ n382 n383
+01 1
+.names p_190gat_27_ n382 n384
+10 1
+.names n383 n384 p_1351gat_557_
+00 0
+.names n186 n310 n386
+01 1
+.names p_64gat_9_ n386 n387
+01 1
+.names p_64gat_9_ n386 n388
+10 1
+.names n387 n388 p_1333gat_581_
+00 0
+.names n287 n381 n390
+01 1
+.names p_176gat_25_ n390 n391
+01 1
+.names p_176gat_25_ n390 n392
+10 1
+.names n391 n392 p_1349gat_565_
+00 0
+.names n268 n381 n394
+01 1
+.names p_183gat_26_ n394 n395
+01 1
+.names p_183gat_26_ n394 n396
+10 1
+.names n395 n396 p_1350gat_561_
+00 0
+.names n306 n381 n398
+01 1
+.names p_169gat_24_ n398 n399
+01 1
+.names p_169gat_24_ n398 n400
+10 1
+.names n399 n400 p_1348gat_569_
+00 0
+.names n110 n138 n402
+01 1
+.names n167 n186 n403
+01 1
+.names n402 n403 n404
+11 1
+.names n335 n404 n405
+01 1
+.names n231 n405 n406
+01 1
+.names p_162gat_23_ n406 n407
+01 1
+.names p_162gat_23_ n406 n408
+10 1
+.names n407 n408 p_1347gat_556_
+00 0
+.names n287 n373 n410
+01 1
+.names p_120gat_17_ n410 n411
+01 1
+.names p_120gat_17_ n410 n412
+10 1
+.names n411 n412 p_1341gat_563_
+00 0
+.names n328 n332 n414
+11 1
+.names n194 n414 n415
+01 1
+.names n186 n415 n416
+01 1
+.names p_8gat_1_ n416 n417
+01 1
+.names p_8gat_1_ n416 n418
+10 1
+.names n417 n418 p_1325gat_579_
+00 0
+.names n138 n415 n420
+01 1
+.names p_15gat_2_ n420 n421
+01 1
+.names p_15gat_2_ n420 n422
+10 1
+.names n421 n422 p_1326gat_575_
+00 0
+.names n306 n405 n424
+01 1
+.names p_141gat_20_ n424 n425
+01 1
+.names p_141gat_20_ n424 n426
+10 1
+.names n425 n426 p_1344gat_568_
+00 0
+.names n110 n415 n428
+01 1
+.names p_1gat_0_ n428 n429
+01 1
+.names p_1gat_0_ n428 n430
+10 1
+.names n429 n430 p_1324gat_583_
+00 0
+.names n231 n373 n432
+01 1
+.names p_134gat_19_ n432 n433
+01 1
+.names p_134gat_19_ n432 n434
+10 1
+.names n433 n434 p_1343gat_555_
+00 0
+.names n287 n405 n436
+01 1
+.names p_148gat_21_ n436 n437
+01 1
+.names p_148gat_21_ n436 n438
+10 1
+.names n437 n438 p_1345gat_564_
+00 0
+.names n186 n347 n440
+01 1
+.names p_92gat_13_ n440 n441
+01 1
+.names p_92gat_13_ n440 n442
+10 1
+.names n441 n442 p_1337gat_582_
+00 0
+.names n167 n415 n444
+01 1
+.names p_22gat_3_ n444 n445
+01 1
+.names p_22gat_3_ n444 n446
+10 1
+.names n445 n446 p_1327gat_571_
+00 0
+.names n306 n373 n448
+01 1
+.names p_113gat_16_ n448 n449
+01 1
+.names p_113gat_16_ n448 n450
+10 1
+.names n449 n450 p_1340gat_567_
+00 0
+.names n268 n405 n452
+01 1
+.names p_155gat_22_ n452 n453
+01 1
+.names p_155gat_22_ n452 n454
+10 1
+.names n453 n454 p_1346gat_560_
+00 0
+.names n167 n347 n456
+01 1
+.names p_106gat_15_ n456 n457
+01 1
+.names p_106gat_15_ n456 n458
+10 1
+.names n457 n458 p_1339gat_574_
+00 0
+.names n231 n337 n460
+01 1
+.names p_218gat_31_ n460 n461
+01 1
+.names p_218gat_31_ n460 n462
+10 1
+.names n461 n462 p_1355gat_558_
+00 0
+.names n138 n347 n464
+01 1
+.names p_99gat_14_ n464 n465
+01 1
+.names p_99gat_14_ n464 n466
+10 1
+.names n465 n466 p_1338gat_578_
+00 0
+.end
