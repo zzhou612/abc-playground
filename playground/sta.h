@@ -21,8 +21,10 @@ std::map<Node, int> CalculateSlack(Network ntk);
 
 void KMostCriticalPaths(Network ntk, int k = 10, bool show_slack = false);
 
-std::vector<Path> GetCriticalPaths(Network ntk);
+std::vector<Path> GetKMostCriticalPaths(Network ntk, int k = -1);
 
-std::vector<Node> MinCut(const Network ntk, std::map<Node, double> error);
+std::vector<Node> MinCut(const Network ntk, std::map<Node, double> error, int k = -1);
+
+std::vector<Node> MinCut_0(const Network ntk, std::map<Node, double> error);
 
 #endif

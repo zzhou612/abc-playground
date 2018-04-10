@@ -1,6 +1,7 @@
 #include <random>
 #include <chrono>
 #include <functional>
+#include <boost/progress.hpp>
 
 #include <ectl_simulator.h>
 
@@ -10,7 +11,7 @@ namespace abc {
 
 namespace ECTL {
 
-    double SimError(Network origin_ntk, Network approx_ntk, int simu_time) {
+    double SimError(Network origin_ntk, Network approx_ntk, bool show_progress_bar, int simu_time) {
         std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> distribution(0, 1);
         auto dice = std::bind(distribution, generator);
@@ -18,7 +19,13 @@ namespace ECTL {
         assert(abc::Abc_NtkIsSopLogic(approx_ntk));
 
         int err = 0;
+        boost::progress_display *pd = nullptr;
+        if (show_progress_bar)
+            pd = new boost::progress_display((unsigned long) simu_time);
+
         for (int _ = 0; _ < simu_time; ++_) {
+            if (show_progress_bar)
+                ++(*pd);
             std::vector<Node> origin_pis = GetPrimaryInputs(origin_ntk);
             std::vector<Node> approx_pis = GetPrimaryInputs(approx_ntk);
 
@@ -46,6 +53,56 @@ namespace ECTL {
         }
         return (double) err / (double) simu_time;
 
+    }
+
+    static std::vector<Node> GetAllNodes(Network ntk) {
+        std::vector<Node> internal_nodes = GetInternalNodes(ntk);
+        std::vector<Node> pi_nodes = GetPrimaryInputs(ntk);
+        pi_nodes.insert(pi_nodes.end(),
+                        std::make_move_iterator(internal_nodes.begin()),
+                        std::make_move_iterator(internal_nodes.end()));
+        return pi_nodes;
+    }
+
+    std::map<Node, double> SimZeroProb(Network ntk, int simu_time) {
+        std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
+        std::uniform_int_distribution<int> distribution(0, 1);
+        auto dice = std::bind(distribution, generator);
+        assert(abc::Abc_NtkIsSopLogic(ntk));
+
+        std::map<Node, double> zero_prob;
+        std::vector<Node> all_nodes = GetAllNodes(ntk);
+
+        for (auto node : GetAllNodes(ntk))
+            zero_prob[node] = -1;
+
+        for (int _ = 0; _ < simu_time; ++_) {
+            std::vector<Node> pis = GetPrimaryInputs(ntk);
+
+            for (auto pi:pis) {
+                pi->iTemp = dice();
+                if (pi->iTemp == 0) {
+                    if (zero_prob[pi] == -1)
+                        zero_prob[pi] = 0;
+                    zero_prob[pi]++;
+                }
+            }
+
+            for (auto node : TopologicalSort(ntk)) {
+                node->iTemp = SopSimulate(node);
+                if (node->iTemp == 0) {
+                    if (zero_prob[node] == -1)
+                        zero_prob[node] = 0;
+                    zero_prob[node]++;
+                }
+            }
+        }
+
+        for (auto node : GetAllNodes(ntk))
+            if (zero_prob[node] != -1)
+                zero_prob[node] /= simu_time;
+
+        return zero_prob;
     }
 
     void SimTest(Network ntk) {

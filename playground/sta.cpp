@@ -267,7 +267,7 @@ void KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
     }
 }
 
-std::vector<Path> GetCriticalPaths(Network ntk) {
+std::vector<Path> GetKMostCriticalPaths(Network ntk, int k) {
     std::vector<Path> critical_paths;
     std::map<Node, int> slack = CalculateSlack(ntk);
     std::vector<Node> sorted_nodes = GetSortedNodes(ntk);
@@ -317,10 +317,11 @@ std::vector<Path> GetCriticalPaths(Network ntk) {
         paths.push(PartialPath(node, max_delay_to_sink.at(node)));
 
     int critical_path_delay = -1;
-    while (!paths.empty()) {
+    while (!paths.empty() && (k == -1 || k > 0)) {
         PartialPath t_path = paths.top();
         paths.pop();
         if (IsPrimaryOutput(t_path.path.back())) {
+            k--;
             if (t_path.max_delay >= critical_path_delay) {
                 critical_path_delay = t_path.max_delay;
                 t_path.path.pop_back();
@@ -345,7 +346,7 @@ std::vector<Path> GetCriticalPaths(Network ntk) {
     return critical_paths;
 }
 
-std::vector<Node> MinCut(const Network ntk, std::map<Node, double> error) {
+std::vector<Node> MinCut(const Network ntk, std::map<Node, double> error, int k) {
     std::map<Node, int> slack = CalculateSlack(ntk);
 
     auto N = (int) abc::Abc_NtkObjNum(ntk) + 2;
@@ -361,7 +362,7 @@ std::vector<Node> MinCut(const Network ntk, std::map<Node, double> error) {
             dinic.AddEdge(u, u + N, error.at(node));
         }
 
-    std::vector<Path> critical_paths = GetCriticalPaths(ntk);
+    std::vector<Path> critical_paths = GetKMostCriticalPaths(ntk, k);
 
     for (const auto &path : critical_paths) {
         for (int i = 0; i < (int) path.nodes.size() - 1; i++) {
@@ -386,6 +387,45 @@ std::vector<Node> MinCut(const Network ntk, std::map<Node, double> error) {
     }
 
     std::cout << "Max Flow: " << dinic.MaxFlow(source, sink) << std::endl;
+    std::vector<Edge> min_cut = dinic.MinCut(source, sink);
+    std::vector<Node> min_cut_nodes;
+    for (auto e:min_cut)
+        min_cut_nodes.push_back(GetNodebyID(ntk, e.u));
+    return min_cut_nodes;
+}
+
+std::vector<Node> MinCut_0(const Network ntk, std::map<Node, double> error) {
+    std::map<Node, int> slack = CalculateSlack(ntk);
+
+    auto N = (int) abc::Abc_NtkObjNum(ntk) + 2;
+    Dinic dinic(N * 2);
+
+    int source = 0, sink = N - 1;
+
+    dinic.AddEdge(source, source + N, INF);
+    dinic.AddEdge(sink, sink + N, INF);
+
+    for (auto node:GetSortedNodes(ntk)) {
+        if (slack.at(node) == 0) {
+            int u = GetNodeID(node);
+            dinic.AddEdge(u, u + N, error.at(node));
+            for (auto &fan_out:GetFanouts(node)) {
+                if (IsPrimaryOutput(fan_out))
+                    continue;
+                if (slack.at(fan_out) == 0) {
+                    int v = GetNodeID(fan_out);
+                    dinic.AddEdge(u + N, v, INF);
+                }
+            }
+
+            if (IsPrimaryInput(node))
+                dinic.AddEdge(source + N, u, INF);
+
+            if (IsPrimaryOutputNode(node))
+                dinic.AddEdge(u + N, sink, INF);
+        }
+    }
+
     std::vector<Edge> min_cut = dinic.MinCut(source, sink);
     std::vector<Node> min_cut_nodes;
     for (auto e:min_cut)

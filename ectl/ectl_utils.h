@@ -32,7 +32,9 @@ namespace ECTL {
 
     std::vector<Node> GetInternalNodes(Network ntk);
 
-    Node GetNodebyName(Network ntk, std::string name);
+    Node GetPrimaryInputbyName(Network ntk, std::string name);
+
+    Node GetInternalNodebyName(Network ntk, std::string name);
 
     Node GetNodebyID(Network ntk, int id);
 
@@ -69,6 +71,8 @@ namespace ECTL {
     void PrintMFFC(Node node);
 
     std::vector<Node> GetMFFCNodes(Node node);
+
+    std::vector<Node> GetMFFCInputs(Node node);
 
     Network CreateMFFCNetwork(Node node);
 

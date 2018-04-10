@@ -263,7 +263,11 @@ namespace ECTL {
         return pos;
     }
 
-    Node GetNodebyName(Network ntk, std::string name) {
+    Node GetPrimaryInputbyName(Network ntk, std::string name) {
+        return abc::Abc_NtkFindCi(ntk, (char *) name.c_str());
+    }
+
+    Node GetInternalNodebyName(Network ntk, std::string name) {
         return abc::Abc_NtkFindNode(ntk, (char *) name.c_str());
     }
 
@@ -392,10 +396,27 @@ namespace ECTL {
         Vec_PtrForEachEntry(Node, vCone, pObj, i) {
             mffc.emplace_back(pObj);
         }
-        printf(" )\n");
         Vec_PtrFree(vCone);
         Vec_PtrFree(vSupp);
         return mffc;
+    }
+
+    std::vector<Node> GetMFFCInputs(Node node) {
+        std::vector<Node> inputs;
+        abc::Vec_Ptr_t *vCone, *vSupp;
+        Node pObj;
+        int i;
+        vCone = abc::Vec_PtrAlloc(100);
+        vSupp = abc::Vec_PtrAlloc(100);
+        abc::Abc_NodeDeref_rec(node);
+        Abc_NodeMffcConeSupp(node, vCone, vSupp);
+        abc::Abc_NodeRef_rec(node);
+        Vec_PtrForEachEntry(Node, vSupp, pObj, i) {
+            inputs.emplace_back(pObj);
+        }
+        Vec_PtrFree(vCone);
+        Vec_PtrFree(vSupp);
+        return inputs;
     }
 
     Network CreateMFFCNetwork(Node node) {
