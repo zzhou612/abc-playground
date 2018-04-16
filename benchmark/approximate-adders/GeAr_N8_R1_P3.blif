@@ -1,0 +1,162 @@
+# Benchmark "GeAr_N8_R1_P3" written by ABC on Mon Apr 16 15:56:35 2018
+.model GeAr_N8_R1_P3
+.inputs in1[0] in1[1] in1[2] in1[3] in1[4] in1[5] in1[6] in1[7] in2[0] \
+ in2[1] in2[2] in2[3] in2[4] in2[5] in2[6] in2[7]
+.outputs res[0] res[1] res[2] res[3] res[4] res[5] res[6] res[7] res[8]
+.names in1[0] in2[0] n26
+01 1
+.names in1[0] in2[0] n27
+10 1
+.names n26 n27 res[0]
+00 0
+.names in1[1] in2[1] n29
+01 1
+.names in1[1] in2[1] n30
+10 1
+.names n29 n30 n31
+00 1
+.names in1[0] in2[0] n32
+11 1
+.names n31 n32 n33
+00 1
+.names n31 n32 n34
+11 1
+.names n33 n34 res[1]
+00 0
+.names in1[2] in2[2] n36
+01 1
+.names in1[2] in2[2] n37
+10 1
+.names n36 n37 n38
+00 1
+.names in1[1] in2[1] n39
+11 1
+.names n31 n32 n40
+01 1
+.names n39 n40 n41
+00 1
+.names n38 n41 n42
+01 1
+.names n38 n41 n43
+10 1
+.names n42 n43 res[2]
+00 0
+.names in1[3] in2[3] n45
+01 1
+.names in1[3] in2[3] n46
+10 1
+.names n45 n46 n47
+00 1
+.names in1[2] in2[2] n48
+11 1
+.names n38 n41 n49
+00 1
+.names n48 n49 n50
+00 1
+.names n47 n50 n51
+01 1
+.names n47 n50 n52
+10 1
+.names n51 n52 res[3]
+00 0
+.names in1[4] in2[4] n54
+01 1
+.names in1[4] in2[4] n55
+10 1
+.names n54 n55 n56
+00 1
+.names in1[3] in2[3] n57
+11 1
+.names n38 n39 n58
+01 1
+.names n48 n58 n59
+00 1
+.names n47 n59 n60
+00 1
+.names n57 n60 n61
+00 1
+.names n56 n61 n62
+01 1
+.names n56 n61 n63
+10 1
+.names n62 n63 res[4]
+00 0
+.names in1[5] in2[5] n65
+01 1
+.names in1[5] in2[5] n66
+10 1
+.names n65 n66 n67
+00 1
+.names in1[4] in2[4] n68
+11 1
+.names n47 n48 n69
+01 1
+.names n57 n69 n70
+00 1
+.names n56 n70 n71
+00 1
+.names n68 n71 n72
+00 1
+.names n67 n72 n73
+01 1
+.names n67 n72 n74
+10 1
+.names n73 n74 res[5]
+00 0
+.names in1[6] in2[6] n76
+01 1
+.names in1[6] in2[6] n77
+10 1
+.names n76 n77 n78
+00 1
+.names in1[5] in2[5] n79
+11 1
+.names n56 n57 n80
+01 1
+.names n68 n80 n81
+00 1
+.names n67 n81 n82
+00 1
+.names n79 n82 n83
+00 1
+.names n78 n83 n84
+01 1
+.names n78 n83 n85
+10 1
+.names n84 n85 res[6]
+00 0
+.names in1[7] in2[7] n87
+01 1
+.names in1[7] in2[7] n88
+10 1
+.names n87 n88 n89
+00 1
+.names in1[6] in2[6] n90
+11 1
+.names n67 n68 n91
+01 1
+.names n79 n91 n92
+00 1
+.names n78 n92 n93
+00 1
+.names n90 n93 n94
+00 1
+.names n89 n94 n95
+01 1
+.names n89 n94 n96
+10 1
+.names n95 n96 res[7]
+00 0
+.names in1[7] in2[7] n98
+11 1
+.names n89 n90 n99
+01 1
+.names n98 n99 n100
+00 1
+.names n78 n89 n101
+00 1
+.names n92 n101 n102
+01 1
+.names n100 n102 res[8]
+10 0
+.end

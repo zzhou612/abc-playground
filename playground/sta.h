@@ -19,7 +19,7 @@ struct Path {
 
 std::map<Node, int> CalculateSlack(Network ntk);
 
-void KMostCriticalPaths(Network ntk, int k = 10, bool show_slack = false);
+int KMostCriticalPaths(Network ntk, int k = 10, bool show_slack = false);
 
 std::vector<Path> GetKMostCriticalPaths(Network ntk, int k = -1);
 

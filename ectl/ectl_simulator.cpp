@@ -11,7 +11,7 @@ namespace abc {
 
 namespace ECTL {
 
-    double SimError(Network origin_ntk, Network approx_ntk, bool show_progress_bar, int simu_time) {
+    double SimErrorRate(Network origin_ntk, Network approx_ntk, bool show_progress_bar, int simu_time) {
         std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> distribution(0, 1);
         auto dice = std::bind(distribution, generator);
@@ -53,6 +53,47 @@ namespace ECTL {
         }
         return (double) err / (double) simu_time;
 
+    }
+
+    double SimMeanRelativeErrorDistance(Network approx_ntk, bool show_progress_bar, int simu_time) {
+        std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
+        std::uniform_int_distribution<int> distribution(0, 1);
+        auto dice = std::bind(distribution, generator);
+        assert(abc::Abc_NtkIsSopLogic(approx_ntk));
+
+        double err = 0;
+        boost::progress_display *pd = nullptr;
+        if (show_progress_bar)
+            pd = new boost::progress_display((unsigned long) simu_time);
+
+        for (int _ = 0; _ < simu_time; ++_) {
+            if (show_progress_bar)
+                ++(*pd);
+
+            for (auto pi : GetPrimaryInputs(approx_ntk))
+                pi->iTemp = dice();
+            for (auto node : TopologicalSort(approx_ntk))
+                node->iTemp = SopSimulate(node);
+            for (auto po : GetPrimaryOutputs(approx_ntk))
+                po->iTemp = GetFanin0(po)->iTemp;
+
+            std::vector<int> inputs, outputs;
+            for (auto pi : GetPrimaryInputs(approx_ntk))
+                inputs.push_back(pi->iTemp);
+            for (auto po : GetPrimaryOutputs(approx_ntk))
+                outputs.push_back(po->iTemp);
+
+            int in1 = 0, in2 = 0, out = 0;
+            for (int i = 0; i < inputs.size() / 2; i++)
+                in1 += inputs[i] * pow(2, i);
+            for (int i = (int) inputs.size() / 2; i < inputs.size(); i++)
+                in2 += inputs[i] * pow(2, i - inputs.size() / 2);
+            for (int i = 0; i < outputs.size(); i++)
+                out += outputs[i] * pow(2, i);
+            if(in1 + in2 != 0)
+                err += (double) abs(out - in1 - in2) /  (double) (in1 + in2) / (double) simu_time;
+        }
+        return err;
     }
 
     static std::vector<Node> GetAllNodes(Network ntk) {

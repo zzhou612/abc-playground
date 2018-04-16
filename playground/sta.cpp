@@ -189,7 +189,8 @@ std::map<Node, int> CalculateSlack(const Network ntk) {
     return slack;
 }
 
-void KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
+int KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
+    int delay = -1;
     std::map<Node, int> slack = CalculateSlack(ntk);
     std::vector<Node> sorted_nodes = GetSortedNodes(ntk);
     std::map<Node, int> max_delay_to_sink;
@@ -242,6 +243,7 @@ void KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
         paths.pop();
         if (IsPrimaryOutput(t_path.path.back())) {
             k--;
+            delay = std::max(delay, t_path.max_delay);
             std::cout << "Delay: " << t_path.max_delay << " ";
             t_path.path.pop_back();
             for (const auto &node : t_path.path) {
@@ -265,6 +267,7 @@ void KMostCriticalPaths(const Network ntk, int k, bool show_slack) {
             }
         }
     }
+    return delay;
 }
 
 std::vector<Path> GetKMostCriticalPaths(Network ntk, int k) {

@@ -1,0 +1,341 @@
+# Benchmark "GeAr_N16_R6_P4" written by ABC on Mon Apr 16 15:43:36 2018
+.model GeAr_N16_R6_P4
+.inputs in1[0] in1[1] in1[2] in1[3] in1[4] in1[5] in1[6] in1[7] in1[8] \
+ in1[9] in1[10] in1[11] in1[12] in1[13] in1[14] in1[15] in2[0] in2[1] \
+ in2[2] in2[3] in2[4] in2[5] in2[6] in2[7] in2[8] in2[9] in2[10] in2[11] \
+ in2[12] in2[13] in2[14] in2[15]
+.outputs res[0] res[1] res[2] res[3] res[4] res[5] res[6] res[7] res[8] \
+ res[9] res[10] res[11] res[12] res[13] res[14] res[15] res[16]
+.names in1[0] in2[0] n50
+01 1
+.names in1[0] in2[0] n51
+10 1
+.names n50 n51 res[0]
+00 0
+.names in1[1] in2[1] n53
+01 1
+.names in1[1] in2[1] n54
+10 1
+.names n53 n54 n55
+00 1
+.names in1[0] in2[0] n56
+11 1
+.names n55 n56 n57
+00 1
+.names n55 n56 n58
+11 1
+.names n57 n58 res[1]
+00 0
+.names in1[2] in2[2] n60
+01 1
+.names in1[2] in2[2] n61
+10 1
+.names n60 n61 n62
+00 1
+.names in1[1] in2[1] n63
+11 1
+.names n55 n56 n64
+01 1
+.names n63 n64 n65
+00 1
+.names n62 n65 n66
+01 1
+.names n62 n65 n67
+10 1
+.names n66 n67 res[2]
+00 0
+.names in1[3] in2[3] n69
+01 1
+.names in1[3] in2[3] n70
+10 1
+.names n69 n70 n71
+00 1
+.names in1[2] in2[2] n72
+11 1
+.names n62 n65 n73
+00 1
+.names n72 n73 n74
+00 1
+.names n71 n74 n75
+01 1
+.names n71 n74 n76
+10 1
+.names n75 n76 res[3]
+00 0
+.names in1[4] in2[4] n78
+01 1
+.names in1[4] in2[4] n79
+10 1
+.names n78 n79 n80
+00 1
+.names in1[3] in2[3] n81
+11 1
+.names n71 n72 n82
+01 1
+.names n81 n82 n83
+00 1
+.names n62 n71 n84
+00 1
+.names n65 n84 n85
+01 1
+.names n83 n85 n86
+10 1
+.names n80 n86 n87
+01 1
+.names n80 n86 n88
+10 1
+.names n87 n88 res[4]
+00 0
+.names in1[5] in2[5] n90
+01 1
+.names in1[5] in2[5] n91
+10 1
+.names n90 n91 n92
+00 1
+.names in1[4] in2[4] n93
+11 1
+.names n80 n86 n94
+00 1
+.names n93 n94 n95
+00 1
+.names n92 n95 n96
+01 1
+.names n92 n95 n97
+10 1
+.names n96 n97 res[5]
+00 0
+.names in1[6] in2[6] n99
+01 1
+.names in1[6] in2[6] n100
+10 1
+.names n99 n100 n101
+00 1
+.names in1[5] in2[5] n102
+11 1
+.names n92 n93 n103
+01 1
+.names n102 n103 n104
+00 1
+.names n80 n92 n105
+00 1
+.names n86 n105 n106
+01 1
+.names n104 n106 n107
+10 1
+.names n101 n107 n108
+01 1
+.names n101 n107 n109
+10 1
+.names n108 n109 res[6]
+00 0
+.names in1[7] in2[7] n111
+01 1
+.names in1[7] in2[7] n112
+10 1
+.names n111 n112 n113
+00 1
+.names in1[6] in2[6] n114
+11 1
+.names n101 n107 n115
+00 1
+.names n114 n115 n116
+00 1
+.names n113 n116 n117
+01 1
+.names n113 n116 n118
+10 1
+.names n117 n118 res[7]
+00 0
+.names in1[8] in2[8] n120
+01 1
+.names in1[8] in2[8] n121
+10 1
+.names n120 n121 n122
+00 1
+.names in1[7] in2[7] n123
+11 1
+.names n113 n114 n124
+01 1
+.names n123 n124 n125
+00 1
+.names n101 n113 n126
+00 1
+.names n104 n126 n127
+01 1
+.names n125 n127 n128
+10 1
+.names n105 n126 n129
+11 1
+.names n86 n129 n130
+01 1
+.names n128 n130 n131
+10 1
+.names n122 n131 n132
+01 1
+.names n122 n131 n133
+10 1
+.names n132 n133 res[8]
+00 0
+.names in1[9] in2[9] n135
+01 1
+.names in1[9] in2[9] n136
+10 1
+.names n135 n136 n137
+00 1
+.names in1[8] in2[8] n138
+11 1
+.names n122 n131 n139
+00 1
+.names n138 n139 n140
+00 1
+.names n137 n140 n141
+01 1
+.names n137 n140 n142
+10 1
+.names n141 n142 res[9]
+00 0
+.names in1[10] in2[10] n144
+01 1
+.names in1[10] in2[10] n145
+10 1
+.names n144 n145 n146
+00 1
+.names in1[9] in2[9] n147
+11 1
+.names n137 n138 n148
+01 1
+.names n147 n148 n149
+00 1
+.names n122 n137 n150
+00 1
+.names n125 n150 n151
+01 1
+.names n149 n151 n152
+10 1
+.names n146 n152 n153
+01 1
+.names n146 n152 n154
+10 1
+.names n153 n154 res[10]
+00 0
+.names in1[11] in2[11] n156
+01 1
+.names in1[11] in2[11] n157
+10 1
+.names n156 n157 n158
+00 1
+.names in1[10] in2[10] n159
+11 1
+.names n146 n152 n160
+00 1
+.names n159 n160 n161
+00 1
+.names n158 n161 n162
+01 1
+.names n158 n161 n163
+10 1
+.names n162 n163 res[11]
+00 0
+.names in1[12] in2[12] n165
+01 1
+.names in1[12] in2[12] n166
+10 1
+.names n165 n166 n167
+00 1
+.names in1[11] in2[11] n168
+11 1
+.names n158 n159 n169
+01 1
+.names n168 n169 n170
+00 1
+.names n146 n158 n171
+00 1
+.names n152 n171 n172
+01 1
+.names n170 n172 n173
+10 1
+.names n167 n173 n174
+01 1
+.names n167 n173 n175
+10 1
+.names n174 n175 res[12]
+00 0
+.names in1[13] in2[13] n177
+01 1
+.names in1[13] in2[13] n178
+10 1
+.names n177 n178 n179
+00 1
+.names in1[12] in2[12] n180
+11 1
+.names n167 n173 n181
+00 1
+.names n180 n181 n182
+00 1
+.names n179 n182 n183
+01 1
+.names n179 n182 n184
+10 1
+.names n183 n184 res[13]
+00 0
+.names in1[14] in2[14] n186
+01 1
+.names in1[14] in2[14] n187
+10 1
+.names n186 n187 n188
+00 1
+.names in1[13] in2[13] n189
+11 1
+.names n179 n180 n190
+01 1
+.names n189 n190 n191
+00 1
+.names n167 n179 n192
+00 1
+.names n170 n192 n193
+01 1
+.names n191 n193 n194
+10 1
+.names n171 n192 n195
+11 1
+.names n152 n195 n196
+01 1
+.names n194 n196 n197
+10 1
+.names n188 n197 n198
+01 1
+.names n188 n197 n199
+10 1
+.names n198 n199 res[14]
+00 0
+.names in1[15] in2[15] n201
+01 1
+.names in1[15] in2[15] n202
+10 1
+.names n201 n202 n203
+00 1
+.names in1[14] in2[14] n204
+11 1
+.names n188 n197 n205
+00 1
+.names n204 n205 n206
+00 1
+.names n203 n206 n207
+01 1
+.names n203 n206 n208
+10 1
+.names n207 n208 res[15]
+00 0
+.names in1[15] in2[15] n210
+11 1
+.names n203 n204 n211
+01 1
+.names n210 n211 n212
+00 1
+.names n188 n203 n213
+00 1
+.names n197 n213 n214
+01 1
+.names n212 n214 res[16]
+10 0
+.end
