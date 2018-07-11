@@ -1,15 +1,11 @@
-#ifndef SIMULATOR_H
-#define SIMULATOR_H
+#ifndef ECTL_SIMULATOR_H
+#define ECTL_SIMULATOR_H
 
-#include <map>
 #include <ectl_utils.h>
-#include <ectl_types.h>
 
 namespace ECTL {
-    double SimErrorRate(Network origin, Network approx, bool show_progress_bar = false, int simu_time = 100000);
-    double SimMeanRelativeErrorDistance(Network approx, bool show_progress_bar = false, int simu_time = 100000);
-    std::map<Node, double> SimZeroProb(Network ntk, int simu_time = 100000);
-    void SimTest(Network ntk);
+//    double SimErrorRate(Network_t origin, Network_t approx, bool show_progress_bar = false, int simu_time = 100000);
+    void SimTest(NetworkPtr ntk);
 }
 
 #endif

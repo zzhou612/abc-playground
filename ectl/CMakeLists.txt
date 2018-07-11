@@ -10,3 +10,7 @@ add_definitions(-DABC_NAMESPACE=abc)
 file(GLOB ectl_source_files "*.h" "*.cpp")
 
 add_library(ectl STATIC ${ectl_source_files})
+#add_library(ectl STATIC abc_api.h
+#        ectl_network.cpp
+#        ectl_network.h)
+

@@ -52,7 +52,7 @@ namespace abc {
         // transfer HAIG
 //    pObjNew->pEquiv = pObj->pEquiv;
         // remember the new node in the old node
-        pObj->pCopy = pObjNew;
+        pObj->pCopy        = pObjNew;
         return pObjNew;
     }
 
@@ -61,8 +61,8 @@ namespace abc {
         Abc_Ntk_t *pNtkNew;
         Abc_Obj_t *pObj, *pFanin, *pNodeCoNew;
         Vec_Ptr_t *vCone, *vSupp;
-        char Buffer[1000];
-        int i, k;
+        char      Buffer[1000];
+        int       i, k;
 
         assert(Abc_NtkIsLogic(pNtk) || Abc_NtkIsStrash(pNtk));
         assert(Abc_ObjIsNode(pNode));
@@ -108,319 +108,95 @@ namespace abc {
         Vec_PtrFree(vSupp);
 
         if (!Abc_NtkCheck(pNtkNew))
-            fprintf(stdout, "Abc_NtkCreateMffc(): Network check has failed.\n");
-        return pNtkNew;
-    }
-
-    static Abc_Ntk_t *ECTL_Abc_NtkDup(Abc_Ntk_t *pNtk) {
-        Abc_Ntk_t *pNtkNew;
-        Abc_Obj_t *pObj, *pFanin;
-        int i, k;
-        if (pNtk == NULL)
-            return NULL;
-        // start the network
-        pNtkNew = Abc_NtkStartFrom(pNtk, pNtk->ntkType, pNtk->ntkFunc);
-        // copy the internal nodes
-        if (Abc_NtkIsStrash(pNtk)) {
-            // copy the AND gates
-            Abc_AigForEachAnd(pNtk, pObj, i)pObj->pCopy = Abc_AigAnd((Abc_Aig_t *) pNtkNew->pManFunc,
-                                                                     Abc_ObjChild0Copy(pObj), Abc_ObjChild1Copy(pObj));
-            // relink the choice nodes
-            Abc_AigForEachAnd(pNtk, pObj, i) if (pObj->pData)
-                    pObj->pCopy->pData = ((Abc_Obj_t *) pObj->pData)->pCopy;
-            // relink the CO nodes
-            Abc_NtkForEachCo(pNtk, pObj, i)Abc_ObjAddFanin(pObj->pCopy, Abc_ObjChild0Copy(pObj));
-            // get the number of nodes before and after
-            if (Abc_NtkNodeNum(pNtk) != Abc_NtkNodeNum(pNtkNew))
-                printf("Warning: Structural hashing during duplication reduced %d nodes (this is a minor bug).\n",
-                       Abc_NtkNodeNum(pNtk) - Abc_NtkNodeNum(pNtkNew));
-        } else {
-            // duplicate the nets and nodes (CIs/COs/latches already dupped)
-            Abc_NtkForEachObj(pNtk, pObj, i) if (pObj->pCopy == NULL)
-                    ECTL_Abc_NtkDupObj(pNtkNew, pObj, Abc_NtkHasBlackbox(pNtk) && Abc_ObjIsNet(pObj));
-            // reconnect all objects (no need to transfer attributes on edges)
-            Abc_NtkForEachObj(pNtk, pObj, i) if (!Abc_ObjIsBox(pObj) && !Abc_ObjIsBo(pObj))
-                    Abc_ObjForEachFanin(pObj, pFanin, k)Abc_ObjAddFanin(pObj->pCopy, pFanin->pCopy);
-        }
-        // duplicate the EXDC Ntk
-        if (pNtk->pExdc)
-            pNtkNew->pExdc = Abc_NtkDup(pNtk->pExdc);
-        if (pNtk->pExcare)
-            pNtkNew->pExcare = Abc_NtkDup((Abc_Ntk_t *) pNtk->pExcare);
-        // duplicate timing manager
-        if (pNtk->pManTime)
-            Abc_NtkTimeInitialize(pNtkNew, pNtk);
-        if (pNtk->vPhases)
-            Abc_NtkTransferPhases(pNtkNew, pNtk);
-        if (pNtk->pWLoadUsed)
-            pNtkNew->pWLoadUsed = Abc_UtilStrsav(pNtk->pWLoadUsed);
-        // check correctness
-        if (!Abc_NtkCheck(pNtkNew))
-            fprintf(stdout, "Abc_NtkDup(): Network check has failed.\n");
-        pNtk->pCopy = pNtkNew;
+            fprintf(stdout, "Abc_NtkCreateMffc(): Network_t check has failed.\n");
         return pNtkNew;
     }
 }
 
 namespace ECTL {
-    Frame StartAbc() {
-        abc::Abc_Start();
-        Frame frame = abc::Abc_FrameGetGlobalFrame();
-        if (!frame) {
-            abc::Abc_Stop();
-            std::cout << "[e] Error: Not able to invoke the ABC frame" << std::endl;
-            std::exit(-1);
-        }
-        return frame;
-    }
+    std::vector<NodePtr> TopologicalSort(NetworkPtr ntk) {
+        abc::Vec_Ptr_t       *nodes = abc::Abc_NtkDfs(ntk->_Get_Abc_Ntk(), 0);
+        std::vector<NodePtr> sorted_nodes;
 
-    void StopABC() {
-        abc::Abc_Stop();
-    }
-
-    Network DuplicateNetwork(Network ntk) {
-        return abc::ECTL_Abc_NtkDup(ntk);
-//        return abc::Abc_NtkDup(ntk);
-
-    }
-
-    Network ReadBlif(std::string ifile) {
-        Network ntk = abc::Io_ReadBlif((char *) ifile.c_str(), 1);
-        ntk = abc::Abc_NtkToLogic(ntk); // Convert to Logic form.
-        return ntk;
-    }
-
-    void WriteBlif(Network ntk, std::string ofile) {
-        abc::Io_WriteBlifLogic(ntk, (char *) ofile.c_str(), 0);
-    }
-
-    void ShowNetworkInfo(Network ntk) {
-        std::cout << "Network Name: " << GetNetworkName(ntk) << std::endl;
-
-        std::cout << "Network Type: ";
-        if (abc::Abc_NtkIsNetlist(ntk))
-            std::cout << "Netlist\n";
-        else if (abc::Abc_NtkIsLogic(ntk))
-            std::cout << "Logic\n";
-        else if (abc::Abc_NtkIsStrash(ntk))
-            std::cout << "Strash\n";
-        else
-            std::cout << "Others\n";
-
-        std::cout << "Network Function: ";
-        if (abc::Abc_NtkHasSop(ntk))
-            std::cout << "SOP\n";
-        else if (abc::Abc_NtkHasBdd(ntk))
-            std::cout << "BDD\n";
-        else if (abc::Abc_NtkHasAig(ntk))
-            std::cout << "AIG\n";
-        else if (abc::Abc_NtkHasMapping(ntk))
-            std::cout << "Map\n";
-        else
-            std::cout << "Others\n";
-    }
-
-    std::string GetNetworkName(Network ntk) {
-        return std::string(ntk->pName);
-    }
-
-    void SetNetworkName(Network ntk, const std::string &new_name) {
-        ntk->pName = abc::Extra_UtilStrsav((char *) new_name.c_str());
-    }
-
-    void DeleteNetwork(Network ntk) {
-        abc::Abc_NtkDelete(ntk);
-    }
-
-    std::vector<Node> TopologicalSort(Network ntk) {
-        abc::Vec_Ptr_t *nodes = abc::Abc_NtkDfs(ntk, 0);
-        std::vector<Node> sorted_nodes;
         for (int i = 0; i < nodes->nSize; ++i) {
-            auto obj = (Node) nodes->pArray[i];
-            sorted_nodes.emplace_back(obj);
+            auto obj = (abc::Abc_Obj_t *) nodes->pArray[i];
+            sorted_nodes.push_back(std::make_shared<Node>(obj));
         }
+
         Vec_PtrFree(nodes);
         return sorted_nodes;
     }
 
-    std::vector<Node> GetPrimaryInputs(Network ntk) {
-        std::vector<Node> pis;
-        Node pi;
-        int i;
-        Abc_NtkForEachPi(ntk, pi, i) {
-            pis.emplace_back(pi);
-        }
-        return pis;
-    }
+//    Node_t CreateConstNode(Network_t ntk, int constant) {
+//        assert(constant == 0 || constant == 1);
+//        if (constant)
+//            return abc::Abc_NtkCreateNodeConst1(ntk);
+//        else
+//            return abc::Abc_NtkCreateNodeConst0(ntk);
+//    }
+//
+//    void ReplaceNode(Node_t old_node, Node_t new_node) {
+//        abc::Abc_ObjReplace(old_node, new_node);
+//    }
 
-    std::vector<Node> GetPrimaryOutputs(Network ntk) {
-        std::vector<Node> pos;
-        Node po;
-        int i;
-        Abc_NtkForEachPo(ntk, po, i) {
-            pos.emplace_back(po);
-        }
-        return pos;
-    }
-
-    Node GetPrimaryInputbyName(Network ntk, std::string name) {
-        return abc::Abc_NtkFindCi(ntk, (char *) name.c_str());
-    }
-
-    Node GetInternalNodebyName(Network ntk, std::string name) {
-        return abc::Abc_NtkFindNode(ntk, (char *) name.c_str());
-    }
-
-    Node GetNodebyID(Network ntk, int id) {
-        return abc::Abc_NtkObj(ntk, id);
-    }
-
-    int GetNodeID(Node node) {
-        return abc::Abc_ObjId(node);
-    }
-
-    Network GetHostNetwork(Node node) {
-        return abc::Abc_ObjNtk(node);
-    }
-
-    std::vector<Node> GetInternalNodes(Network ntk) {
-        std::vector<Node> nodes;
-        Node node;
-        int i;
-        Abc_NtkForEachNode(ntk, node, i) {
-                nodes.emplace_back(node);
-            }
-        return nodes;
-    }
-
-    std::string GetNodeName(Node node) {
-        return std::string(Abc_ObjName(node));
-    }
-
-    std::vector<Node> GetFanins(Node node) {
-        std::vector<Node> fan_ins;
-        Node fan_in;
-        int i;
-        Abc_ObjForEachFanin(node, fan_in, i) {
-            fan_ins.emplace_back(fan_in);
-        }
-        return fan_ins;
-    }
-
-    Node GetFanin0(Node node) {
-        return abc::Abc_ObjFanin0(node);
-    }
-
-    Node GetFanin1(Node node) {
-        return abc::Abc_ObjFanin1(node);
-    }
-
-    std::vector<Node> GetFanouts(Node node) {
-        std::vector<Node> fan_outs;
-        Node fan_out;
-        int i;
-        Abc_ObjForEachFanout(node, fan_out, i) {
-            fan_outs.emplace_back(fan_out);
-        }
-        return fan_outs;
-    }
-
-    Node GetFanout0(Node node) {
-        return abc::Abc_ObjFanout0(node);
-    }
-
-    bool IsPrimaryInput(Node node) {
-        return (bool) abc::Abc_ObjIsPi(node);
-    }
-
-    bool IsPrimaryOutput(Node node) {
-        return (bool)abc::Abc_ObjIsPo(node);
-    }
-
-    bool IsPrimaryOutputNode(Node node) {
-        for (auto fan_out : GetFanouts(node))
-            if(IsPrimaryOutput(fan_out))
-                return true;
-        return false;
-    }
-
-    bool IsNode(Node node) {
-        return (bool) abc::Abc_ObjIsNode(node);
-    }
-
-    Node CreateConstNode(Network ntk, int constant) {
-        assert(constant == 0 || constant == 1);
-        if (constant)
-            return abc::Abc_NtkCreateNodeConst1(ntk);
-        else
-            return abc::Abc_NtkCreateNodeConst0(ntk);
-    }
-
-    void ReplaceNode(Node old_node, Node new_node) {
-        abc::Abc_ObjReplace(old_node, new_node);
-    }
-
-    int SopSimulate(Node node) {
-        return abc::Abc_ObjSopSimulate(node);
-    }
-
-    void PrintMFFC(Node node) {
+    void PrintMFFC(NodePtr node) {
         //Abc_NodeMffcConeSuppPrint
         using namespace abc;
         Vec_Ptr_t *vCone, *vSupp;
         Abc_Obj_t *pObj;
-        int i;
+        int       i;
         vCone = Vec_PtrAlloc(100);
         vSupp = Vec_PtrAlloc(100);
-        Abc_NodeDeref_rec(node);
-        Abc_NodeMffcConeSupp(node, vCone, vSupp);
-        Abc_NodeRef_rec(node);
-        printf("Node = %6s : Supp = %3d  Cone = %3d  (",
-               Abc_ObjName(node), Vec_PtrSize(vSupp), Vec_PtrSize(vCone));
+        Abc_NodeDeref_rec(node->_Get_Abc_Node());
+        Abc_NodeMffcConeSupp(node->_Get_Abc_Node(), vCone, vSupp);
+        Abc_NodeRef_rec(node->_Get_Abc_Node());
+        printf("Node_t = %6s : Supp = %3d  Cone = %3d  (",
+               Abc_ObjName(node->_Get_Abc_Node()), Vec_PtrSize(vSupp), Vec_PtrSize(vCone));
         Vec_PtrForEachEntry(Abc_Obj_t *, vCone, pObj, i)printf(" %s", Abc_ObjName(pObj));
         printf(" )\n");
         Vec_PtrFree(vCone);
         Vec_PtrFree(vSupp);
     }
 
-    std::vector<Node> GetMFFCNodes(Node node) {
-        std::vector<Node> mffc;
-        abc::Vec_Ptr_t *vCone, *vSupp;
-        Node pObj;
-        int i;
+    std::vector<NodePtr> GetMFFCNodes(NodePtr node) {
+        std::vector<NodePtr> mffc;
+        abc::Vec_Ptr_t       *vCone, *vSupp;
+        abc::Abc_Obj_t       *pObj;
+        int                  i;
         vCone = abc::Vec_PtrAlloc(100);
         vSupp = abc::Vec_PtrAlloc(100);
-        abc::Abc_NodeDeref_rec(node);
-        Abc_NodeMffcConeSupp(node, vCone, vSupp);
-        abc::Abc_NodeRef_rec(node);
-        Vec_PtrForEachEntry(Node, vCone, pObj, i) {
-            mffc.emplace_back(pObj);
+        abc::Abc_NodeDeref_rec(node->_Get_Abc_Node());
+        Abc_NodeMffcConeSupp(node->_Get_Abc_Node(), vCone, vSupp);
+        abc::Abc_NodeRef_rec(node->_Get_Abc_Node());
+        Vec_PtrForEachEntry(abc::Abc_Obj_t *, vCone, pObj, i) {
+            mffc.push_back(std::make_shared<Node>(pObj));
         }
         Vec_PtrFree(vCone);
         Vec_PtrFree(vSupp);
         return mffc;
     }
 
-    std::vector<Node> GetMFFCInputs(Node node) {
-        std::vector<Node> inputs;
-        abc::Vec_Ptr_t *vCone, *vSupp;
-        Node pObj;
-        int i;
+    std::vector<NodePtr> GetMFFCInputs(NodePtr node) {
+        std::vector<NodePtr> inputs;
+        abc::Vec_Ptr_t       *vCone, *vSupp;
+        abc::Abc_Obj_t       *pObj;
+        int                  i;
         vCone = abc::Vec_PtrAlloc(100);
         vSupp = abc::Vec_PtrAlloc(100);
-        abc::Abc_NodeDeref_rec(node);
-        Abc_NodeMffcConeSupp(node, vCone, vSupp);
-        abc::Abc_NodeRef_rec(node);
-        Vec_PtrForEachEntry(Node, vSupp, pObj, i) {
-            inputs.emplace_back(pObj);
+        abc::Abc_NodeDeref_rec(node->_Get_Abc_Node());
+        Abc_NodeMffcConeSupp(node->_Get_Abc_Node(), vCone, vSupp);
+        abc::Abc_NodeRef_rec(node->_Get_Abc_Node());
+        Vec_PtrForEachEntry(abc::Abc_Obj_t *, vSupp, pObj, i) {
+            inputs.push_back(std::make_shared<Node>(pObj));
         }
         Vec_PtrFree(vCone);
         Vec_PtrFree(vSupp);
         return inputs;
     }
 
-    Network CreateMFFCNetwork(Node node) {
-        return abc::ECTL_Abc_NtkCreateMffc(GetHostNetwork(node), node, abc::Abc_ObjName(node));
+    NetworkPtr CreateMFFCNetwork(NodePtr node) {
+        return std::make_shared<Network>(abc::ECTL_Abc_NtkCreateMffc(abc::Abc_ObjNtk(node->_Get_Abc_Node()),
+                                                                     node->_Get_Abc_Node(),
+                                                                     abc::Abc_ObjName(node->_Get_Abc_Node())));
     }
-
 }

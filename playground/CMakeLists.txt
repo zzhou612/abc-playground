@@ -11,7 +11,7 @@ include_directories(${ectl_include})
 include_directories(${ext_include})
 link_directories(${ext_lib})
 
-add_executable(abc_playground main.cpp sta.cpp sta.h)
+add_executable(abc_playground main.cpp)
 target_link_libraries(abc_playground
         ectl
         ${abc_libraries}
