@@ -60,62 +60,6 @@ namespace abc {
         return pObjNew;
     }
 
-    // use ECTL_Abc_NtkDupObj for copying to keep the consistency of node names
-    static Abc_Ntk_t *ECTL_Abc_NtkCreateMffc(Abc_Ntk_t *pNtk, Abc_Obj_t *pNode, char *pNodeName) {
-        Abc_Ntk_t *pNtkNew;
-        Abc_Obj_t *pObj, *pFanin, *pNodeCoNew;
-        Vec_Ptr_t *vCone, *vSupp;
-        char      Buffer[1000];
-        int       i, k;
-
-        assert(Abc_NtkIsLogic(pNtk) || Abc_NtkIsStrash(pNtk));
-        assert(Abc_ObjIsNode(pNode));
-
-        // start the network
-        pNtkNew = Abc_NtkAlloc(pNtk->ntkType, pNtk->ntkFunc, 1);
-        // set the name
-        sprintf(Buffer, "%s_%s", pNtk->pName, pNodeName);
-        pNtkNew->pName = Extra_UtilStrsav(Buffer);
-
-        // establish connection between the constant nodes
-        if (Abc_NtkIsStrash(pNtk))
-            Abc_AigConst1(pNtk)->pCopy = Abc_AigConst1(pNtkNew);
-
-        // collect the nodes in MFFC
-        vCone = Vec_PtrAlloc(100);
-        vSupp = Vec_PtrAlloc(100);
-        Abc_NodeDeref_rec(pNode);
-        Abc_NodeMffcConeSupp(pNode, vCone, vSupp);
-        Abc_NodeRef_rec(pNode);
-        // create the PIs
-        Vec_PtrForEachEntry(Abc_Obj_t *, vSupp, pObj, i) {
-            pObj->pCopy = Abc_NtkCreatePi(pNtkNew);
-            Abc_ObjAssignName(pObj->pCopy, Abc_ObjName(pObj), NULL);
-        }
-        // create the PO
-        pNodeCoNew = Abc_NtkCreatePo(pNtkNew);
-        Abc_ObjAssignName(pNodeCoNew, pNodeName, NULL);
-        // copy the nodes
-        Vec_PtrForEachEntry(Abc_Obj_t *, vCone, pObj, i) {
-            // if it is an AIG, add to the hash table
-            if (Abc_NtkIsStrash(pNtk)) {
-                pObj->pCopy = Abc_AigAnd((Abc_Aig_t *) pNtkNew->pManFunc, Abc_ObjChild0Copy(pObj),
-                                         Abc_ObjChild1Copy(pObj));
-            } else {
-                ECTL_Abc_NtkDupObj(pNtkNew, pObj, 0);
-                Abc_ObjForEachFanin(pObj, pFanin, k)Abc_ObjAddFanin(pObj->pCopy, pFanin->pCopy);
-            }
-        }
-        // connect the topmost node
-        Abc_ObjAddFanin(pNodeCoNew, pNode->pCopy);
-        Vec_PtrFree(vCone);
-        Vec_PtrFree(vSupp);
-
-        if (!Abc_NtkCheck(pNtkNew))
-            fprintf(stdout, "Abc_NtkCreateMffc(): Network check has failed.\n");
-        return pNtkNew;
-    }
-
     static Abc_Ntk_t *ECTL_Abc_NtkDup(Abc_Ntk_t *pNtk) {
         Abc_Ntk_t *pNtkNew;
         Abc_Obj_t *pObj, *pFanin;
@@ -182,11 +126,6 @@ namespace ECTL {
 
     Node::Node(abc::Abc_Obj_t *abc_node) : abc_node_(abc_node) {}
 
-//    Network Node::CreateMFFCNetwork() {
-//        return Network(
-//                abc::ECTL_Abc_NtkCreateMffc(abc::Abc_ObjNtk(abc_node_), abc_node_, abc::Abc_ObjName(abc_node_)));
-//    }
-
     int Node::GetID() {
         return abc::Abc_ObjId(abc_node_);
     }
@@ -235,8 +174,16 @@ namespace ECTL {
         return abc_node_;
     }
 
-    int Node::SopSimulate() {
-        return abc::Abc_ObjSopSimulate(abc_node_);
+    void Node::SopSimulate() {
+        SetiTemp(abc::Abc_ObjSopSimulate(abc_node_));
+    }
+
+    int Node::GetiTemp() {
+        return abc_node_->iTemp;
+    }
+
+    void Node::SetiTemp(int val) {
+        abc_node_->iTemp = val;
     }
 
     void Network::ReadBlif(const std::string &ifile) {

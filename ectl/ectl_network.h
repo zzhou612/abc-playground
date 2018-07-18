@@ -27,8 +27,6 @@ namespace ECTL {
 
         std::vector<NodePtr> GetFanouts();
 
-//        NetworkPtr CreateMFFCNetwork();
-
         bool IsPrimaryInput();
 
         bool IsPrimaryOutput();
@@ -37,7 +35,11 @@ namespace ECTL {
 
         bool IsNode();
 
-        int SopSimulate();
+        void SopSimulate();
+
+        int GetiTemp();
+
+        void SetiTemp(int val);
 
         abc::Abc_Obj_t *_Get_Abc_Node();
 
