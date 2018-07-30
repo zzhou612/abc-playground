@@ -1,6 +1,8 @@
 #ifndef ECTL_SIMULATOR_H
 #define ECTL_SIMULATOR_H
 
+#include <abc_api.h>
+#include <ectl_network.h>
 #include <ectl_utils.h>
 
 namespace ECTL {
