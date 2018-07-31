@@ -16,17 +16,14 @@ namespace ECTL {
 
     class Node {
     public:
+////////////////////////////////////////////////////////////////////////
         std::string GetName();
 
-        int GetID();
+        int GetiTemp();
 
-        NodePtr GetFanin0();
+        void SetiTemp(int val);
 
-        NodePtr GetFanin1();
-
-        std::vector<NodePtr> GetFanins();
-
-        std::vector<NodePtr> GetFanouts();
+        void SopSimulate();
 
         bool IsPrimaryInput();
 
@@ -36,18 +33,29 @@ namespace ECTL {
 
         bool IsNode();
 
-        void SopSimulate();
+        bool IsInverter();
 
-        int GetiTemp();
+////////////////////////////////////////////////////////////////////////
+        int GetID();
 
-        void SetiTemp(int val);
+        NodePtr GetFanin0();
 
+        NodePtr GetFanin1();
+
+        std::vector<NodePtr> GetFanIns();
+
+        std::vector<NodePtr> GetFanOuts();
+
+////////////////////////////////////////////////////////////////////////
         abc::Abc_Obj_t *_Get_Abc_Node();
 
         explicit Node(abc::Abc_Obj_t *abc_node);
 
     private:
         abc::Abc_Obj_t *abc_node_;
+        int id_;
+        std::vector<NodePtr> fan_ins_;
+        std::vector<NodePtr> fan_outs_;
     };
 
     class Network {
@@ -86,6 +94,7 @@ namespace ECTL {
 
     private:
         abc::Abc_Ntk_t *abc_ntk_;
+        std::vector<NodePtr> nodes_;
     };
 }
 

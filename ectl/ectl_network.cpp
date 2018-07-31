@@ -1,8 +1,7 @@
 #include <iostream>
-#include <string>
 #include <abc_api.h>
 #include <ectl_network.h>
-#include <vector>
+
 
 namespace abc {
     int Abc_ObjSopSimulate(Abc_Obj_t *pObj);
@@ -56,14 +55,14 @@ namespace abc {
         // transfer HAIG
 //    pObjNew->pEquiv = pObj->pEquiv;
         // remember the new node in the old node
-        pObj->pCopy        = pObjNew;
+        pObj->pCopy = pObjNew;
         return pObjNew;
     }
 
     static Abc_Ntk_t *ECTL_Abc_NtkDup(Abc_Ntk_t *pNtk) {
         Abc_Ntk_t *pNtkNew;
         Abc_Obj_t *pObj, *pFanin;
-        int       i, k;
+        int i, k;
         if (pNtk == NULL)
             return NULL;
         // start the network
@@ -71,9 +70,8 @@ namespace abc {
         // copy the internal nodes
         if (Abc_NtkIsStrash(pNtk)) {
             // copy the AND gates
-            Abc_AigForEachAnd(pNtk, pObj, i)
-                    pObj->pCopy = Abc_AigAnd((Abc_Aig_t *) pNtkNew->pManFunc,
-                                             Abc_ObjChild0Copy(pObj), Abc_ObjChild1Copy(pObj));
+            Abc_AigForEachAnd(pNtk, pObj, i)pObj->pCopy = Abc_AigAnd((Abc_Aig_t *) pNtkNew->pManFunc,
+                                                                     Abc_ObjChild0Copy(pObj), Abc_ObjChild1Copy(pObj));
             // relink the choice nodes
             Abc_AigForEachAnd(pNtk, pObj, i) if (pObj->pData)
                     pObj->pCopy->pData = ((Abc_Obj_t *) pObj->pData)->pCopy;
@@ -93,7 +91,7 @@ namespace abc {
         }
         // duplicate the EXDC Ntk
         if (pNtk->pExdc)
-            pNtkNew->pExdc   = Abc_NtkDup(pNtk->pExdc);
+            pNtkNew->pExdc = Abc_NtkDup(pNtk->pExdc);
         if (pNtk->pExcare)
             pNtkNew->pExcare = Abc_NtkDup((Abc_Ntk_t *) pNtk->pExcare);
         // duplicate timing manager
@@ -117,33 +115,44 @@ namespace ECTL {
     }
 
     NodePtr Node::GetFanin0() {
-        return std::make_shared<Node>(abc::Abc_ObjFanin0(abc_node_));
+        return fan_ins_[0];
     }
 
     NodePtr Node::GetFanin1() {
-        return std::make_shared<Node>(abc::Abc_ObjFanin1(abc_node_));
+        return fan_ins_[1];
     }
 
-    Node::Node(abc::Abc_Obj_t *abc_node) : abc_node_(abc_node) {}
+    Node::Node(abc::Abc_Obj_t *abc_node) : abc_node_(abc_node) {
+        id_ = abc::Abc_ObjId(abc_node_);
+        abc::Abc_Obj_t *fan_in;
+        abc::Abc_Obj_t *fan_out;
+        int i;
+        Abc_ObjForEachFanin(abc_node_, fan_in, i) {
+            fan_ins_.push_back(std::make_shared<Node>(fan_in));
+        }
+        Abc_ObjForEachFanout(abc_node_, fan_out, i) {
+            fan_outs_.push_back(std::make_shared<Node>(fan_out));
+        }
+    }
 
     int Node::GetID() {
-        return abc::Abc_ObjId(abc_node_);
+        return id_;
     }
 
-    std::vector<NodePtr> Node::GetFanins() {
+    std::vector<NodePtr> Node::GetFanIns() {
         std::vector<NodePtr> fan_ins;
-        abc::Abc_Obj_t    *fan_in;
-        int               i;
+        abc::Abc_Obj_t *fan_in;
+        int i;
         Abc_ObjForEachFanin(abc_node_, fan_in, i) {
             fan_ins.push_back(std::make_shared<Node>(fan_in));
         }
         return fan_ins;
     }
 
-    std::vector<NodePtr> Node::GetFanouts() {
+    std::vector<NodePtr> Node::GetFanOuts() {
         std::vector<NodePtr> fan_outs;
-        abc::Abc_Obj_t    *fan_out;
-        int               i;
+        abc::Abc_Obj_t *fan_out;
+        int i;
         Abc_ObjForEachFanout(abc_node_, fan_out, i) {
             fan_outs.push_back(std::make_shared<Node>(fan_out));
         }
@@ -160,7 +169,7 @@ namespace ECTL {
     }
 
     bool Node::IsPrimaryOutputNode() {
-        for (auto &fan_out : GetFanouts())
+        for (auto &fan_out : GetFanOuts())
             if (fan_out->IsPrimaryOutput())
                 return true;
         return false;
@@ -184,6 +193,10 @@ namespace ECTL {
 
     void Node::SetiTemp(int val) {
         abc_node_->iTemp = val;
+    }
+
+    bool Node::IsInverter() {
+        return (bool) abc::Abc_NodeIsInv(abc_node_);
     }
 
     void Network::ReadBlif(const std::string &ifile) {
@@ -246,8 +259,8 @@ namespace ECTL {
 
     std::vector<NodePtr> Network::GetPrimaryInputs() {
         std::vector<NodePtr> pis;
-        abc::Abc_Obj_t    *pi;
-        int               i;
+        abc::Abc_Obj_t *pi;
+        int i;
         Abc_NtkForEachPi(abc_ntk_, pi, i) {
             pis.push_back(std::make_shared<Node>(pi));
         }
@@ -256,8 +269,8 @@ namespace ECTL {
 
     std::vector<NodePtr> Network::GetPrimaryOutputs() {
         std::vector<NodePtr> pos;
-        abc::Abc_Obj_t    *po;
-        int               i;
+        abc::Abc_Obj_t *po;
+        int i;
         Abc_NtkForEachPo(abc_ntk_, po, i) {
             pos.push_back(std::make_shared<Node>(po));
         }
@@ -266,8 +279,8 @@ namespace ECTL {
 
     std::vector<NodePtr> Network::GetInternalNodes() {
         std::vector<NodePtr> nodes;
-        abc::Abc_Obj_t    *node;
-        int               i;
+        abc::Abc_Obj_t *node;
+        int i;
         Abc_NtkForEachNode(abc_ntk_, node, i) {
                 nodes.push_back(std::make_shared<Node>(node));
             }
