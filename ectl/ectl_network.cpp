@@ -1,6 +1,7 @@
 #include <iostream>
 #include <abc_api.h>
 #include <ectl_network.h>
+#include "ectl_network.h"
 
 
 namespace abc {
@@ -55,14 +56,14 @@ namespace abc {
         // transfer HAIG
 //    pObjNew->pEquiv = pObj->pEquiv;
         // remember the new node in the old node
-        pObj->pCopy = pObjNew;
+        pObj->pCopy        = pObjNew;
         return pObjNew;
     }
 
     static Abc_Ntk_t *ECTL_Abc_NtkDup(Abc_Ntk_t *pNtk) {
         Abc_Ntk_t *pNtkNew;
         Abc_Obj_t *pObj, *pFanin;
-        int i, k;
+        int       i, k;
         if (pNtk == NULL)
             return NULL;
         // start the network
@@ -91,7 +92,7 @@ namespace abc {
         }
         // duplicate the EXDC Ntk
         if (pNtk->pExdc)
-            pNtkNew->pExdc = Abc_NtkDup(pNtk->pExdc);
+            pNtkNew->pExdc   = Abc_NtkDup(pNtk->pExdc);
         if (pNtk->pExcare)
             pNtkNew->pExcare = Abc_NtkDup((Abc_Ntk_t *) pNtk->pExcare);
         // duplicate timing manager
@@ -110,102 +111,72 @@ namespace abc {
 }
 
 namespace ECTL {
-    std::string Node::GetName() {
-        return std::string(Abc_ObjName(abc_node_));
-    }
+    std::string Object::GetName() { return std::string(Abc_ObjName(abc_obj_)); }
 
-    NodePtr Node::GetFanin0() {
-        return fan_ins_[0];
-    }
+    ObjectPtr Object::GetObjbyID(int id) { return host_ntk_->GetObjbyID(id); }
 
-    NodePtr Node::GetFanin1() {
-        return fan_ins_[1];
-    }
+    ObjectPtr Object::GetFanin0() { return fan_ins_[0]; }
 
-    Node::Node(abc::Abc_Obj_t *abc_node) : abc_node_(abc_node) {
-        id_ = abc::Abc_ObjId(abc_node_);
-        abc::Abc_Obj_t *fan_in;
-        abc::Abc_Obj_t *fan_out;
-        int i;
-        Abc_ObjForEachFanin(abc_node_, fan_in, i) {
-            fan_ins_.push_back(std::make_shared<Node>(fan_in));
-        }
-        Abc_ObjForEachFanout(abc_node_, fan_out, i) {
-            fan_outs_.push_back(std::make_shared<Node>(fan_out));
-        }
-    }
+    ObjectPtr Object::GetFanin1() { return fan_ins_[1]; }
 
-    int Node::GetID() {
-        return id_;
-    }
+    int Object::GetID() { return abc::Abc_ObjId(abc_obj_); }
 
-    std::vector<NodePtr> Node::GetFanIns() {
-        std::vector<NodePtr> fan_ins;
-        abc::Abc_Obj_t *fan_in;
-        int i;
-        Abc_ObjForEachFanin(abc_node_, fan_in, i) {
-            fan_ins.push_back(std::make_shared<Node>(fan_in));
-        }
-        return fan_ins;
-    }
+    std::vector<ObjectPtr> Object::GetFanIns() { return fan_ins_; }
 
-    std::vector<NodePtr> Node::GetFanOuts() {
-        std::vector<NodePtr> fan_outs;
-        abc::Abc_Obj_t *fan_out;
-        int i;
-        Abc_ObjForEachFanout(abc_node_, fan_out, i) {
-            fan_outs.push_back(std::make_shared<Node>(fan_out));
-        }
-        return fan_outs;
-    }
+    std::vector<ObjectPtr> Object::GetFanOuts() { return fan_outs_; }
 
-    bool Node::IsPrimaryInput() {
-        return (bool) abc::Abc_ObjIsPi(abc_node_);
-    }
+    bool Object::IsPrimaryInput() { return (bool) abc::Abc_ObjIsPi(abc_obj_); }
 
-    bool Node::IsPrimaryOutput() {
-        return (bool) abc::Abc_ObjIsPo(abc_node_);
+    bool Object::IsPrimaryOutput() { return (bool) abc::Abc_ObjIsPo(abc_obj_); }
 
-    }
+    abc::Abc_Obj_t *Object::_Get_Abc_Node() { return abc_obj_; }
 
-    bool Node::IsPrimaryOutputNode() {
+    bool Object::IsPrimaryOutputNode() {
         for (auto &fan_out : GetFanOuts())
             if (fan_out->IsPrimaryOutput())
                 return true;
         return false;
     }
 
-    bool Node::IsNode() {
-        return (bool) abc::Abc_ObjIsNode(abc_node_);
+    bool Object::IsNode() { return (bool) abc::Abc_ObjIsNode(abc_obj_); }
+
+    bool Object::IsInverter() { return (bool) abc::Abc_NodeIsInv(abc_obj_); }
+
+    void Object::SopSimulate() { SetiTemp(abc::Abc_ObjSopSimulate(abc_obj_)); }
+
+    int Object::GetiTemp() { return abc_obj_->iTemp; }
+
+    void Object::SetiTemp(int val) { abc_obj_->iTemp = val; }
+
+    Object::Object(abc::Abc_Obj_t *abc_node) : abc_obj_(abc_node) {}
+
+    Object::Object(abc::Abc_Obj_t *abc_node, NetworkPtr host_ntk) : abc_obj_(abc_node), host_ntk_(std::move(host_ntk)) {}
+
+    void Object::Init() {
+        abc::Abc_Obj_t *fan_in, *fan_out;
+        int            i;
+        Abc_ObjForEachFanin(abc_obj_, fan_in, i) {
+            int fan_in_id = abc::Abc_ObjId(fan_in);
+            fan_ins_.push_back(host_ntk_->GetObjbyID(fan_in_id));
+        }
+        Abc_ObjForEachFanout(abc_obj_, fan_out, i) {
+            int fan_out_id = abc::Abc_ObjId(fan_out);
+            fan_outs_.push_back(host_ntk_->GetObjbyID(fan_out_id));
+        }
     }
 
-    abc::Abc_Obj_t *Node::_Get_Abc_Node() {
-        return abc_node_;
-    }
-
-    void Node::SopSimulate() {
-        SetiTemp(abc::Abc_ObjSopSimulate(abc_node_));
-    }
-
-    int Node::GetiTemp() {
-        return abc_node_->iTemp;
-    }
-
-    void Node::SetiTemp(int val) {
-        abc_node_->iTemp = val;
-    }
-
-    bool Node::IsInverter() {
-        return (bool) abc::Abc_NodeIsInv(abc_node_);
-    }
-
-    void Network::ReadBlif(const std::string &ifile) {
+    void Network::ReadBlifLogic(const std::string &ifile) {
         abc_ntk_ = abc::Io_ReadBlif((char *) ifile.c_str(), 1);
-        abc_ntk_ = abc::Abc_NtkToLogic(abc_ntk_); // Convert to Logic form.
+        abc_ntk_ = abc::Abc_NtkToLogic(abc_ntk_);
+        this->Init();
     }
 
-    NodePtr Network::GetNodebyID(int id) {
-        return std::make_shared<Node>(abc::Abc_NtkObj(abc_ntk_, id));
+    void Network::WriteBlifLogic(const std::string &ofile) { abc::Io_WriteBlifLogic(abc_ntk_, (char *) ofile.c_str(), 0); }
+
+    NetworkPtr Network::Duplicate() {
+        auto dup_ntk = std::make_shared<Network>(abc::ECTL_Abc_NtkDup(abc_ntk_));
+        dup_ntk->Init();
+        return dup_ntk;
     }
 
     void Network::ShowInfo() {
@@ -235,68 +206,47 @@ namespace ECTL {
 
     Network::Network() = default;
 
-    Network::~Network() {
-        abc::Abc_NtkDelete(abc_ntk_);
-    }
+    Network::~Network() { abc::Abc_NtkDelete(abc_ntk_); }
 
     Network::Network(abc::Abc_Ntk_t *abc_ntk) : abc_ntk_(abc_ntk) {}
 
-    void Network::WriteBlif(const std::string &ofile) {
-        abc::Io_WriteBlifLogic(abc_ntk_, (char *) ofile.c_str(), 0);
-    }
+    std::string Network::GetName() { return std::string(abc_ntk_->pName); }
 
-    NetworkPtr Network::Duplicate() {
-        return std::make_shared<Network>(abc::ECTL_Abc_NtkDup(abc_ntk_));
-    }
+    void Network::SetName(const std::string &new_name) { abc_ntk_->pName = abc::Extra_UtilStrsav((char *) new_name.c_str()); }
 
-    std::string Network::GetName() {
-        return std::string(abc_ntk_->pName);
-    }
+    ObjectPtr Network::GetObjbyID(int id) { return objs_[id - 1]; }
 
-    void Network::SetName(const std::string &new_name) {
-        abc_ntk_->pName = abc::Extra_UtilStrsav((char *) new_name.c_str());
-    }
+    std::vector<ObjectPtr> Network::GetPrimaryInputs() { return pis_; }
 
-    std::vector<NodePtr> Network::GetPrimaryInputs() {
-        std::vector<NodePtr> pis;
-        abc::Abc_Obj_t *pi;
-        int i;
-        Abc_NtkForEachPi(abc_ntk_, pi, i) {
-            pis.push_back(std::make_shared<Node>(pi));
-        }
-        return pis;
-    }
+    std::vector<ObjectPtr> Network::GetPrimaryOutputs() { return pos_; }
 
-    std::vector<NodePtr> Network::GetPrimaryOutputs() {
-        std::vector<NodePtr> pos;
-        abc::Abc_Obj_t *po;
-        int i;
-        Abc_NtkForEachPo(abc_ntk_, po, i) {
-            pos.push_back(std::make_shared<Node>(po));
-        }
-        return pos;
-    }
+    std::vector<ObjectPtr> Network::GetNodes() { return nodes_; }
 
-    std::vector<NodePtr> Network::GetInternalNodes() {
-        std::vector<NodePtr> nodes;
-        abc::Abc_Obj_t *node;
-        int i;
-        Abc_NtkForEachNode(abc_ntk_, node, i) {
-                nodes.push_back(std::make_shared<Node>(node));
+    ObjectPtr Network::GetPrimaryInputbyName(std::string name) { return GetObjbyID(abc::Abc_ObjId(abc::Abc_NtkFindCi(abc_ntk_, (char *) name.c_str()))); }
+
+    ObjectPtr Network::GetNodebyName(std::string name) { return GetObjbyID(abc::Abc_ObjId(abc::Abc_NtkFindNode(abc_ntk_, (char *) name.c_str()))); }
+
+    abc::Abc_Ntk_t *Network::_Get_Abc_Ntk() { return abc_ntk_; }
+
+    void Network::Init() {
+        abc::Abc_Obj_t *abc_obj;
+        int            i;
+
+        Abc_NtkForEachObj(abc_ntk_, abc_obj, i) {
+                auto obj = std::make_shared<Object>(abc_obj, shared_from_this());
+                assert(objs_.size() == abc::Abc_ObjId(abc_obj) - 1);
+                objs_.push_back(obj);
+
+                if (abc::Abc_ObjIsNode(abc_obj))
+                    nodes_.push_back(obj);
+                if (abc::Abc_ObjIsPi(abc_obj))
+                    pis_.push_back(obj);
+                if (abc::Abc_ObjIsPo(abc_obj))
+                    pos_.push_back(obj);
             }
-        return nodes;
-    }
 
-    NodePtr Network::GetPrimaryInputbyName(std::string name) {
-        return std::make_shared<Node>(abc::Abc_NtkFindCi(abc_ntk_, (char *) name.c_str()));
-    }
-
-    NodePtr Network::GetInternalNodebyName(std::string name) {
-        return std::make_shared<Node>(abc::Abc_NtkFindNode(abc_ntk_, (char *) name.c_str()));
-    }
-
-    abc::Abc_Ntk_t *Network::_Get_Abc_Ntk() {
-        return abc_ntk_;
+        for (const auto &obj : objs_) {
+            obj->Init();
+        }
     }
 }
-

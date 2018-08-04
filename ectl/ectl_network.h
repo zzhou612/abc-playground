@@ -6,17 +6,18 @@
 #include <vector>
 
 namespace ECTL {
-    class Node;
+    class Object;
 
     class Network;
 
-    using NodePtr = std::shared_ptr<Node>;
+    using ObjectPtr = std::shared_ptr<Object>;
 
     using NetworkPtr = std::shared_ptr<Network>;
 
-    class Node {
+    class Object {
     public:
-////////////////////////////////////////////////////////////////////////
+        void Init();
+
         std::string GetName();
 
         int GetiTemp();
@@ -35,34 +36,37 @@ namespace ECTL {
 
         bool IsInverter();
 
-////////////////////////////////////////////////////////////////////////
         int GetID();
 
-        NodePtr GetFanin0();
+        ObjectPtr GetObjbyID(int id);
 
-        NodePtr GetFanin1();
+        ObjectPtr GetFanin0();
 
-        std::vector<NodePtr> GetFanIns();
+        ObjectPtr GetFanin1();
 
-        std::vector<NodePtr> GetFanOuts();
+        std::vector<ObjectPtr> GetFanIns();
 
-////////////////////////////////////////////////////////////////////////
+        std::vector<ObjectPtr> GetFanOuts();
+
         abc::Abc_Obj_t *_Get_Abc_Node();
 
-        explicit Node(abc::Abc_Obj_t *abc_node);
+        explicit Object(abc::Abc_Obj_t *abc_node);
+
+        Object(abc::Abc_Obj_t *abc_node, NetworkPtr host_ntk);
 
     private:
-        abc::Abc_Obj_t *abc_node_;
-        int id_;
-        std::vector<NodePtr> fan_ins_;
-        std::vector<NodePtr> fan_outs_;
+        abc::Abc_Obj_t *abc_obj_;
+
+        NetworkPtr             host_ntk_;
+        std::vector<ObjectPtr> fan_ins_;
+        std::vector<ObjectPtr> fan_outs_;
     };
 
-    class Network {
+    class Network : public std::enable_shared_from_this<Network> {
     public:
-        void ReadBlif(const std::string &ifile);
+        void ReadBlifLogic(const std::string &ifile);
 
-        void WriteBlif(const std::string &ofile);
+        void WriteBlifLogic(const std::string &ofile);
 
         void ShowInfo();
 
@@ -72,17 +76,17 @@ namespace ECTL {
 
         std::string GetName();
 
-        std::vector<NodePtr> GetPrimaryInputs();
+        std::vector<ObjectPtr> GetPrimaryInputs();
 
-        std::vector<NodePtr> GetPrimaryOutputs();
+        std::vector<ObjectPtr> GetPrimaryOutputs();
 
-        std::vector<NodePtr> GetInternalNodes();
+        std::vector<ObjectPtr> GetNodes();
 
-        NodePtr GetNodebyID(int id);
+        ObjectPtr GetObjbyID(int id);
 
-        NodePtr GetPrimaryInputbyName(std::string name);
+        ObjectPtr GetPrimaryInputbyName(std::string name);
 
-        NodePtr GetInternalNodebyName(std::string name);
+        ObjectPtr GetNodebyName(std::string name);
 
         abc::Abc_Ntk_t *_Get_Abc_Ntk();
 
@@ -90,11 +94,17 @@ namespace ECTL {
 
         explicit Network(abc::Abc_Ntk_t *abc_ntk_);
 
+        void Init();
+
         ~Network();
 
     private:
         abc::Abc_Ntk_t *abc_ntk_;
-        std::vector<NodePtr> nodes_;
+
+        std::vector<ObjectPtr> objs_;
+        std::vector<ObjectPtr> nodes_;
+        std::vector<ObjectPtr> pis_;
+        std::vector<ObjectPtr> pos_;
     };
 }
 

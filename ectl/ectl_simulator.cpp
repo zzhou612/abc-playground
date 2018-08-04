@@ -81,7 +81,7 @@ namespace ECTL {
         for (auto &pi : ntk->GetPrimaryInputs())
             std::cout << pi->GetName() << "=" << pi->GetiTemp() << " ";
         std::cout << "\nInternal nodes (including primary output nodes):\n";
-        for (auto &node: ntk->GetInternalNodes())
+        for (auto &node: ntk->GetNodes())
             std::cout << node->GetName() << "=" << node->GetiTemp() << " ";
         std::cout << "\nPrimary outputs:\n";
         for (auto &po : ntk->GetPrimaryOutputs())

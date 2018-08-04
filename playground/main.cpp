@@ -10,22 +10,23 @@ using namespace ECTL;
 int main() {
     path project_source_dir(PROJECT_SOURCE_DIR);
     path benchmark_dir  = project_source_dir / "benchmark";
-    path benchmark_path = benchmark_dir / "C880.blif";
+    path benchmark_path = benchmark_dir / "C5315.blif";
     path mffc_path      = benchmark_dir / "mffc.blif";
 
     auto ntk = std::make_shared<Network>();
-    ntk->ReadBlif(benchmark_path.string());
+    ntk->ReadBlifLogic(benchmark_path.string());
     auto ntk_copied = ntk->Duplicate();
 
-    std::cout << std::endl;
-
-    for (auto &node : TopologicalSort(ntk)) {
-        if(IsInverter(node))
-            std::cout << node->GetName() << " ";
-    }
+    for (const auto &node: TopologicalSort(ntk))
+        std::cout << node->GetID() << "-" << node->GetName() << " ";
 
     std::cout << std::endl;
-    std::cout << SimErrorRate(ntk, ntk_copied, true, 1000);
+
+    for (const auto &node : ntk->GetNodes())
+        std::cout << node->GetID() << "-" << node->GetName() << " ";
+
+    std::cout << std::endl;
+    std::cout << SimErrorRate(ntk, ntk_copied, true);
 
     return 0;
 }

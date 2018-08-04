@@ -114,17 +114,17 @@ namespace abc {
 }
 
 namespace ECTL {
-    std::vector<NodePtr> TopologicalSort(NetworkPtr ntk) {
-        abc::Vec_Ptr_t       *nodes = abc::Abc_NtkDfs(ntk->_Get_Abc_Ntk(), 0);
-        std::vector<NodePtr> sorted_nodes;
+    std::vector<ObjectPtr> TopologicalSort(NetworkPtr ntk) {
+        abc::Vec_Ptr_t         *abc_objs = abc::Abc_NtkDfs(ntk->_Get_Abc_Ntk(), 0);
+        std::vector<ObjectPtr> sorted_objs;
 
-        for (int i = 0; i < nodes->nSize; ++i) {
-            auto obj = (abc::Abc_Obj_t *) nodes->pArray[i];
-            sorted_nodes.push_back(std::make_shared<Node>(obj));
+        for (int i = 0; i < abc_objs->nSize; ++i) {
+            int id = abc::Abc_ObjId((abc::Abc_Obj_t *) abc_objs->pArray[i]);
+            sorted_objs.push_back(ntk->GetObjbyID(id));
         }
 
-        Vec_PtrFree(nodes);
-        return sorted_nodes;
+        Vec_PtrFree(abc_objs);
+        return sorted_objs;
     }
 
 //    Node_t CreateConstNode(Network_t ntk, int constant) {
@@ -139,7 +139,7 @@ namespace ECTL {
 //        abc::Abc_ObjReplace(old_node, new_node);
 //    }
 
-    void PrintMFFC(NodePtr node) {
+    void PrintMFFC(ObjectPtr node) {
         //Abc_NodeMffcConeSuppPrint
         using namespace abc;
         Vec_Ptr_t *vCone, *vSupp;
@@ -158,45 +158,47 @@ namespace ECTL {
         Vec_PtrFree(vSupp);
     }
 
-    std::vector<NodePtr> GetMFFCNodes(NodePtr node) {
-        std::vector<NodePtr> mffc;
-        abc::Vec_Ptr_t       *vCone, *vSupp;
-        abc::Abc_Obj_t       *pObj;
-        int                  i;
+    std::vector<ObjectPtr> GetMFFCNodes(ObjectPtr node) {
+        std::vector<ObjectPtr> mffc;
+        abc::Vec_Ptr_t         *vCone, *vSupp;
+        abc::Abc_Obj_t         *pObj;
+        int                    i;
         vCone = abc::Vec_PtrAlloc(100);
         vSupp = abc::Vec_PtrAlloc(100);
         abc::Abc_NodeDeref_rec(node->_Get_Abc_Node());
         Abc_NodeMffcConeSupp(node->_Get_Abc_Node(), vCone, vSupp);
         abc::Abc_NodeRef_rec(node->_Get_Abc_Node());
         Vec_PtrForEachEntry(abc::Abc_Obj_t *, vCone, pObj, i) {
-            mffc.push_back(std::make_shared<Node>(pObj));
+            mffc.push_back(node->GetObjbyID(abc::Abc_ObjId(pObj)));
         }
         Vec_PtrFree(vCone);
         Vec_PtrFree(vSupp);
         return mffc;
     }
 
-    std::vector<NodePtr> GetMFFCInputs(NodePtr node) {
-        std::vector<NodePtr> inputs;
-        abc::Vec_Ptr_t       *vCone, *vSupp;
-        abc::Abc_Obj_t       *pObj;
-        int                  i;
+    std::vector<ObjectPtr> GetMFFCInputs(ObjectPtr node) {
+        std::vector<ObjectPtr> inputs;
+        abc::Vec_Ptr_t         *vCone, *vSupp;
+        abc::Abc_Obj_t         *pObj;
+        int                    i;
         vCone = abc::Vec_PtrAlloc(100);
         vSupp = abc::Vec_PtrAlloc(100);
         abc::Abc_NodeDeref_rec(node->_Get_Abc_Node());
         Abc_NodeMffcConeSupp(node->_Get_Abc_Node(), vCone, vSupp);
         abc::Abc_NodeRef_rec(node->_Get_Abc_Node());
         Vec_PtrForEachEntry(abc::Abc_Obj_t *, vSupp, pObj, i) {
-            inputs.push_back(std::make_shared<Node>(pObj));
+            inputs.push_back(node->GetObjbyID(abc::Abc_ObjId(pObj)));
         }
         Vec_PtrFree(vCone);
         Vec_PtrFree(vSupp);
         return inputs;
     }
 
-    NetworkPtr CreateMFFCNetwork(NodePtr node) {
-        return std::make_shared<Network>(abc::ECTL_Abc_NtkCreateMffc(abc::Abc_ObjNtk(node->_Get_Abc_Node()),
-                                                                     node->_Get_Abc_Node(),
-                                                                     abc::Abc_ObjName(node->_Get_Abc_Node())));
+    NetworkPtr CreateMFFCNetwork(ObjectPtr node) {
+        auto mffc_ntk = std::make_shared<Network>(abc::ECTL_Abc_NtkCreateMffc(abc::Abc_ObjNtk(node->_Get_Abc_Node()),
+                                                                              node->_Get_Abc_Node(),
+                                                                              abc::Abc_ObjName(node->_Get_Abc_Node())));
+        mffc_ntk->Init();
+        return mffc_ntk;
     }
 }
