@@ -16,8 +16,6 @@ namespace ECTL {
 
     class Object {
     public:
-        void Init();
-
         std::string GetName();
 
         int GetiTemp();
@@ -40,9 +38,9 @@ namespace ECTL {
 
         ObjectPtr GetObjbyID(int id);
 
-        ObjectPtr GetFanin0();
+        ObjectPtr GetFanIn0();
 
-        ObjectPtr GetFanin1();
+        ObjectPtr GetFanIn1();
 
         std::vector<ObjectPtr> GetFanIns();
 
@@ -50,12 +48,15 @@ namespace ECTL {
 
         abc::Abc_Obj_t *_Get_Abc_Node();
 
+        void Renew();
+
         explicit Object(abc::Abc_Obj_t *abc_node);
 
         Object(abc::Abc_Obj_t *abc_node, NetworkPtr host_ntk);
 
     private:
         abc::Abc_Obj_t *abc_obj_;
+        bool renewed;
 
         NetworkPtr             host_ntk_;
         std::vector<ObjectPtr> fan_ins_;
@@ -64,7 +65,7 @@ namespace ECTL {
 
     class Network : public std::enable_shared_from_this<Network> {
     public:
-        void ReadBlifLogic(const std::string &ifile);
+        void ReadBlifLogic(const std::string &ifile, bool renewed = true);
 
         void WriteBlifLogic(const std::string &ofile);
 
@@ -72,7 +73,7 @@ namespace ECTL {
 
         void SetName(const std::string &new_name);
 
-        NetworkPtr Duplicate();
+        NetworkPtr Duplicate(bool renew = true);
 
         std::string GetName();
 
@@ -90,16 +91,17 @@ namespace ECTL {
 
         abc::Abc_Ntk_t *_Get_Abc_Ntk();
 
+        void Renew();
+
         Network();
 
         explicit Network(abc::Abc_Ntk_t *abc_ntk_);
-
-        void Init();
 
         ~Network();
 
     private:
         abc::Abc_Ntk_t *abc_ntk_;
+        bool renewed;
 
         std::vector<ObjectPtr> objs_;
         std::vector<ObjectPtr> nodes_;

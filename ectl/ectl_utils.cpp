@@ -198,7 +198,7 @@ namespace ECTL {
         auto mffc_ntk = std::make_shared<Network>(abc::ECTL_Abc_NtkCreateMffc(abc::Abc_ObjNtk(node->_Get_Abc_Node()),
                                                                               node->_Get_Abc_Node(),
                                                                               abc::Abc_ObjName(node->_Get_Abc_Node())));
-        mffc_ntk->Init();
+        mffc_ntk->Renew();
         return mffc_ntk;
     }
 }
