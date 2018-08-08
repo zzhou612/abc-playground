@@ -116,15 +116,15 @@ namespace ECTL {
 
     ObjectPtr Object::GetObjbyID(int id) { return host_ntk_->GetObjbyID(id); }
 
-    ObjectPtr Object::GetFanIn0() { assert(renewed); return fan_ins_[0]; }
+    ObjectPtr Object::GetFanin0() { assert(renewed); return fan_ins_[0]; }
 
-    ObjectPtr Object::GetFanIn1() { assert(renewed); return fan_ins_[1]; }
+    ObjectPtr Object::GetFanin1() { assert(renewed); return fan_ins_[1]; }
 
     int Object::GetID() { return abc::Abc_ObjId(abc_obj_); }
 
-    std::vector<ObjectPtr> Object::GetFanIns() { assert(renewed); return fan_ins_; }
+    std::vector<ObjectPtr> Object::GetFanins() { assert(renewed); return fan_ins_; }
 
-    std::vector<ObjectPtr> Object::GetFanOuts() { assert(renewed); return fan_outs_; }
+    std::vector<ObjectPtr> Object::GetFanouts() { assert(renewed); return fan_outs_; }
 
     bool Object::IsPrimaryInput() { return (bool) abc::Abc_ObjIsPi(abc_obj_); }
 
@@ -133,7 +133,7 @@ namespace ECTL {
     abc::Abc_Obj_t *Object::_Get_Abc_Node() { return abc_obj_; }
 
     bool Object::IsPrimaryOutputNode() {
-        for (auto &fan_out : GetFanOuts())
+        for (auto &fan_out : GetFanouts())
             if (fan_out->IsPrimaryOutput())
                 return true;
         return false;
@@ -169,10 +169,10 @@ namespace ECTL {
         renewed = true;
     }
 
-    void Network::ReadBlifLogic(const std::string &ifile, bool renewed) {
+    void Network::ReadBlifLogic(const std::string &ifile, bool renew) {
         abc_ntk_ = abc::Io_ReadBlif((char *) ifile.c_str(), 1);
         abc_ntk_ = abc::Abc_NtkToLogic(abc_ntk_);
-        if (renewed) this->Renew();
+        if (renew) this->Renew();
     }
 
     void Network::WriteBlifLogic(const std::string &ofile) {

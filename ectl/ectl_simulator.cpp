@@ -41,12 +41,12 @@ namespace ECTL {
             for (const auto &node : TopologicalSort(origin_ntk))
                 node->SopSimulate();
             for (const auto &po : origin_ntk->GetPrimaryOutputs())
-                po->SetiTemp(po->GetFanIn0()->GetiTemp());
+                po->SetiTemp(po->GetFanin0()->GetiTemp());
 
             for (const auto &node : TopologicalSort(approx_ntk))
                 node->SopSimulate();
             for (const auto &po : approx_ntk->GetPrimaryOutputs())
-                po->SetiTemp(po->GetFanIn0()->GetiTemp());
+                po->SetiTemp(po->GetFanin0()->GetiTemp());
 
             auto origin_pos = origin_ntk->GetPrimaryOutputs();
             auto approx_pos = approx_ntk->GetPrimaryOutputs();
@@ -74,7 +74,7 @@ namespace ECTL {
         for (auto &node : TopologicalSort(ntk))
             node->SopSimulate();
         for (auto &po : ntk->GetPrimaryOutputs())
-            po->SetiTemp(po->GetFanIn0()->GetiTemp());
+            po->SetiTemp(po->GetFanin0()->GetiTemp());
 
         std::cout << "Performing simulation test (one round) for " << ntk->GetName() << ":\n";
         std::cout << "Primary inputs:\n";

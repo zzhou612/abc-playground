@@ -10,6 +10,8 @@ namespace ECTL {
 
     class Network;
 
+    using ObjectID = int;
+
     using ObjectPtr = std::shared_ptr<Object>;
 
     using NetworkPtr = std::shared_ptr<Network>;
@@ -38,13 +40,13 @@ namespace ECTL {
 
         ObjectPtr GetObjbyID(int id);
 
-        ObjectPtr GetFanIn0();
+        ObjectPtr GetFanin0();
 
-        ObjectPtr GetFanIn1();
+        ObjectPtr GetFanin1();
 
-        std::vector<ObjectPtr> GetFanIns();
+        std::vector<ObjectPtr> GetFanins();
 
-        std::vector<ObjectPtr> GetFanOuts();
+        std::vector<ObjectPtr> GetFanouts();
 
         abc::Abc_Obj_t *_Get_Abc_Node();
 
@@ -65,7 +67,7 @@ namespace ECTL {
 
     class Network : public std::enable_shared_from_this<Network> {
     public:
-        void ReadBlifLogic(const std::string &ifile, bool renewed = true);
+        void ReadBlifLogic(const std::string &ifile, bool renew = true);
 
         void WriteBlifLogic(const std::string &ofile);
 
