@@ -48,7 +48,7 @@ namespace ECTL {
 
         std::vector<ObjectPtr> GetFanouts();
 
-        abc::Abc_Obj_t *_Get_Abc_Node();
+        abc::Abc_Obj_t *_Get_Abc_Obj();
 
         void Renew();
 
@@ -58,7 +58,7 @@ namespace ECTL {
 
     private:
         abc::Abc_Obj_t *abc_obj_;
-        bool renewed;
+        bool           renewed;
 
         NetworkPtr             host_ntk_;
         std::vector<ObjectPtr> fan_ins_;
@@ -79,17 +79,29 @@ namespace ECTL {
 
         std::string GetName();
 
+        std::vector<ObjectPtr> GetObjs();
+
         std::vector<ObjectPtr> GetPrimaryInputs();
 
         std::vector<ObjectPtr> GetPrimaryOutputs();
 
         std::vector<ObjectPtr> GetNodes();
 
+        std::vector<ObjectPtr> GetPIsNodes();
+
         ObjectPtr GetObjbyID(int id);
 
         ObjectPtr GetPrimaryInputbyName(std::string name);
 
         ObjectPtr GetNodebyName(std::string name);
+
+        void ReplaceObj(ObjectPtr obj_old, ObjectPtr obj_new);
+
+        void RecoverObjFrom(ObjectPtr obj_bak);
+
+        void DeleteObj(ObjectPtr obj);
+
+        ObjectPtr CreateInverter(ObjectPtr fan_in);
 
         abc::Abc_Ntk_t *_Get_Abc_Ntk();
 
@@ -103,7 +115,7 @@ namespace ECTL {
 
     private:
         abc::Abc_Ntk_t *abc_ntk_;
-        bool renewed;
+        bool           renewed;
 
         std::vector<ObjectPtr> objs_;
         std::vector<ObjectPtr> nodes_;

@@ -114,7 +114,7 @@ namespace abc {
 }
 
 namespace ECTL {
-    std::vector<ObjectPtr> TopologicalSort(NetworkPtr ntk) {
+    std::vector<ObjectPtr> TopologicalSort(const NetworkPtr &ntk) {
         abc::Vec_Ptr_t         *abc_objs = abc::Abc_NtkDfs(ntk->_Get_Abc_Ntk(), 0);
         std::vector<ObjectPtr> sorted_objs;
 
@@ -122,8 +122,12 @@ namespace ECTL {
             int id = abc::Abc_ObjId((abc::Abc_Obj_t *) abc_objs->pArray[i]);
             sorted_objs.push_back(ntk->GetObjbyID(id));
         }
-
         Vec_PtrFree(abc_objs);
+
+        auto pis = ntk->GetPrimaryInputs();
+        sorted_objs.insert(sorted_objs.begin(),
+                           std::make_move_iterator(pis.begin()),
+                           std::make_move_iterator(pis.end()));
         return sorted_objs;
     }
 
@@ -139,7 +143,7 @@ namespace ECTL {
 //        abc::Abc_ObjReplace(old_node, new_node);
 //    }
 
-    void PrintMFFC(ObjectPtr node) {
+    void PrintMFFC(const ObjectPtr &node) {
         //Abc_NodeMffcConeSuppPrint
         using namespace abc;
         Vec_Ptr_t *vCone, *vSupp;
@@ -147,27 +151,27 @@ namespace ECTL {
         int       i;
         vCone = Vec_PtrAlloc(100);
         vSupp = Vec_PtrAlloc(100);
-        Abc_NodeDeref_rec(node->_Get_Abc_Node());
-        Abc_NodeMffcConeSupp(node->_Get_Abc_Node(), vCone, vSupp);
-        Abc_NodeRef_rec(node->_Get_Abc_Node());
+        Abc_NodeDeref_rec(node->_Get_Abc_Obj());
+        Abc_NodeMffcConeSupp(node->_Get_Abc_Obj(), vCone, vSupp);
+        Abc_NodeRef_rec(node->_Get_Abc_Obj());
         printf("Node_t = %6s : Supp = %3d  Cone = %3d  (",
-               Abc_ObjName(node->_Get_Abc_Node()), Vec_PtrSize(vSupp), Vec_PtrSize(vCone));
+               Abc_ObjName(node->_Get_Abc_Obj()), Vec_PtrSize(vSupp), Vec_PtrSize(vCone));
         Vec_PtrForEachEntry(Abc_Obj_t *, vCone, pObj, i)printf(" %s", Abc_ObjName(pObj));
         printf(" )\n");
         Vec_PtrFree(vCone);
         Vec_PtrFree(vSupp);
     }
 
-    std::vector<ObjectPtr> GetMFFCNodes(ObjectPtr node) {
+    std::vector<ObjectPtr> GetMFFCNodes(const ObjectPtr &node) {
         std::vector<ObjectPtr> mffc;
         abc::Vec_Ptr_t         *vCone, *vSupp;
         abc::Abc_Obj_t         *pObj;
         int                    i;
         vCone = abc::Vec_PtrAlloc(100);
         vSupp = abc::Vec_PtrAlloc(100);
-        abc::Abc_NodeDeref_rec(node->_Get_Abc_Node());
-        Abc_NodeMffcConeSupp(node->_Get_Abc_Node(), vCone, vSupp);
-        abc::Abc_NodeRef_rec(node->_Get_Abc_Node());
+        abc::Abc_NodeDeref_rec(node->_Get_Abc_Obj());
+        Abc_NodeMffcConeSupp(node->_Get_Abc_Obj(), vCone, vSupp);
+        abc::Abc_NodeRef_rec(node->_Get_Abc_Obj());
         Vec_PtrForEachEntry(abc::Abc_Obj_t *, vCone, pObj, i) {
             mffc.push_back(node->GetObjbyID(abc::Abc_ObjId(pObj)));
         }
@@ -176,16 +180,16 @@ namespace ECTL {
         return mffc;
     }
 
-    std::vector<ObjectPtr> GetMFFCInputs(ObjectPtr node) {
+    std::vector<ObjectPtr> GetMFFCInputs(const ObjectPtr &node) {
         std::vector<ObjectPtr> inputs;
         abc::Vec_Ptr_t         *vCone, *vSupp;
         abc::Abc_Obj_t         *pObj;
         int                    i;
         vCone = abc::Vec_PtrAlloc(100);
         vSupp = abc::Vec_PtrAlloc(100);
-        abc::Abc_NodeDeref_rec(node->_Get_Abc_Node());
-        Abc_NodeMffcConeSupp(node->_Get_Abc_Node(), vCone, vSupp);
-        abc::Abc_NodeRef_rec(node->_Get_Abc_Node());
+        abc::Abc_NodeDeref_rec(node->_Get_Abc_Obj());
+        Abc_NodeMffcConeSupp(node->_Get_Abc_Obj(), vCone, vSupp);
+        abc::Abc_NodeRef_rec(node->_Get_Abc_Obj());
         Vec_PtrForEachEntry(abc::Abc_Obj_t *, vSupp, pObj, i) {
             inputs.push_back(node->GetObjbyID(abc::Abc_ObjId(pObj)));
         }
@@ -194,10 +198,10 @@ namespace ECTL {
         return inputs;
     }
 
-    NetworkPtr CreateMFFCNetwork(ObjectPtr node) {
-        auto mffc_ntk = std::make_shared<Network>(abc::ECTL_Abc_NtkCreateMffc(abc::Abc_ObjNtk(node->_Get_Abc_Node()),
-                                                                              node->_Get_Abc_Node(),
-                                                                              abc::Abc_ObjName(node->_Get_Abc_Node())));
+    NetworkPtr CreateMFFCNetwork(const ObjectPtr &node) {
+        auto mffc_ntk = std::make_shared<Network>(abc::ECTL_Abc_NtkCreateMffc(abc::Abc_ObjNtk(node->_Get_Abc_Obj()),
+                                                                              node->_Get_Abc_Obj(),
+                                                                              abc::Abc_ObjName(node->_Get_Abc_Obj())));
         mffc_ntk->Renew();
         return mffc_ntk;
     }

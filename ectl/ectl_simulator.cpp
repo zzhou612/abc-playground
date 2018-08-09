@@ -38,13 +38,15 @@ namespace ECTL {
                 approx_pis[i]->SetiTemp(rand_val);
             }
 
-            for (const auto &node : TopologicalSort(origin_ntk))
-                node->SopSimulate();
+            for (const auto &obj : TopologicalSort(origin_ntk))
+                if (obj->IsNode())
+                    obj->SopSimulate();
             for (const auto &po : origin_ntk->GetPrimaryOutputs())
                 po->SetiTemp(po->GetFanin0()->GetiTemp());
 
-            for (const auto &node : TopologicalSort(approx_ntk))
-                node->SopSimulate();
+            for (const auto &obj : TopologicalSort(approx_ntk))
+                if (obj->IsNode())
+                    obj->SopSimulate();
             for (const auto &po : approx_ntk->GetPrimaryOutputs())
                 po->SetiTemp(po->GetFanin0()->GetiTemp());
 
@@ -60,6 +62,46 @@ namespace ECTL {
         }
         return (double) err / (double) sim_time;
 
+    }
+
+    std::unordered_map<ObjectPtr, std::vector<int>> SimTruthVector(const NetworkPtr &ntk,
+                                                                   bool show_progress_bar,
+                                                                   int sim_time) {
+        std::unordered_map<ObjectPtr, std::vector<int>> truth_vec;
+
+        truth_vec.reserve(ntk->GetPIsNodes().size());
+
+        for (const auto &obj : ntk->GetPIsNodes()) {
+            truth_vec.emplace(obj, std::vector<int>());
+            truth_vec.at(obj).reserve(sim_time);
+        }
+
+        std::default_random_engine         generator(
+                (unsigned) std::chrono::system_clock::now().time_since_epoch().count());
+        std::uniform_int_distribution<int> distribution(0, 1);
+        boost::progress_display            *pd  = nullptr;
+        auto                               dice = std::bind(distribution, generator);
+        assert(abc::Abc_NtkIsSopLogic(ntk->_Get_Abc_Ntk()));
+        if (show_progress_bar)
+            pd = new boost::progress_display((unsigned long) sim_time);
+
+        for (int _ = 0; _ < sim_time; ++_) {
+            if (show_progress_bar)
+                ++(*pd);
+            auto origin_pis = ntk->GetPrimaryInputs();
+
+            for (const auto &obj : TopologicalSort(ntk)) {
+                if (obj->IsPrimaryInput()) {
+                    int rand_val = dice();
+                    obj->SetiTemp(rand_val);
+                    truth_vec[obj].push_back(obj->GetiTemp());
+                } else if (obj->IsNode()) {
+                    obj->SopSimulate();
+                    truth_vec[obj].push_back(obj->GetiTemp());
+                }
+            }
+        }
+        return truth_vec;
     }
 
     void SimTest(NetworkPtr ntk) {

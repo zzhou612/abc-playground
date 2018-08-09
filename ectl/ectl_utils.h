@@ -7,7 +7,7 @@
 #include <ectl_network.h>
 
 namespace ECTL {
-    std::vector<ObjectPtr> TopologicalSort(NetworkPtr ntk);
+    std::vector<ObjectPtr> TopologicalSort(const NetworkPtr &ntk);
 
 //    Node_t CreateConstNode(Network_t ntk, int constant);
 //
@@ -15,11 +15,11 @@ namespace ECTL {
 
     void PrintMFFC(ObjectPtr node);
 
-    std::vector<ObjectPtr> GetMFFCNodes(ObjectPtr node);
+    std::vector<ObjectPtr> GetMFFCNodes(const ObjectPtr &node);
 
-    std::vector<ObjectPtr> GetMFFCInputs(ObjectPtr node);
+    std::vector<ObjectPtr> GetMFFCInputs(const ObjectPtr &node);
 
-    NetworkPtr CreateMFFCNetwork(ObjectPtr node);
+    NetworkPtr CreateMFFCNetwork(const ObjectPtr &node);
 }
 
 #endif
