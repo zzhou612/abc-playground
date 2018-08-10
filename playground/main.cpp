@@ -35,9 +35,9 @@ int main() {
         std::cout << node->GetID() << "-" << node->GetName() << " ";
     std::cout << std::endl;
 
-    auto target_node     = approx_ntk->GetNodebyName("23GAT(9)");
+    auto target_node     = approx_ntk->GetNodebyName("G23gat");
     auto target_node_bak = origin_ntk->GetObjbyID(target_node->GetID());
-    auto sub_node        = approx_ntk->GetNodebyName("19GAT(7)");
+    auto sub_node        = approx_ntk->GetNodebyName("G19gat");
 
     auto sub_inv = approx_ntk->CreateInverter(sub_node);
 

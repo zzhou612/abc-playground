@@ -171,16 +171,16 @@ Currently, ECTL library is still under development. The current major issue is t
 
 ### Playground
 
-The demo program in `playground` directory is a simple example of approximate substitution. The signal 23GAT is replaced with the inverted signal 19GAT. The error rate of the resulted approximate circuit is obtained through logic simulations. Then the approximate network is recovered to its original topology.
+The demo program in `playground` directory is a simple example of approximate substitution. The signal G23gat is replaced with the inverted signal G19gat. The error rate of the resulted approximate circuit is obtained through logic simulations. Then the approximate network is recovered to its original topology.
 
 ```cpp
 auto origin_ntk = std::make_shared<Network>();
 origin_ntk->ReadBlifLogic(benchmark_path.string());
 auto approx_ntk = origin_ntk->Duplicate();
 
-auto target_node     = approx_ntk->GetNodebyName("23GAT(9)");
+auto target_node     = approx_ntk->GetNodebyName("G23gat");
 auto target_node_bak = origin_ntk->GetObjbyID(target_node->GetID());
-auto sub_node        = approx_ntk->GetNodebyName("19GAT(7)");
+auto sub_node        = approx_ntk->GetNodebyName("G19gat");
 
 auto sub_inv = approx_ntk->CreateInverter(sub_node);
 
