@@ -158,15 +158,41 @@ For example, to iterate through all the objects in the target network, we can us
 #define Abc_NtkForEachObj( pNtk, pObj, i ) \
     ...
 ```
-To transfer fanouts from one object to another, we can use:
+To create a network based on the maximum fanout free cone of the target node, we can use:
 ```c
-extern ABC_DLL void Abc_ObjTransferFanout( Abc_Obj_t * pObjOld, Abc_Obj_t * pObjNew );
+extern ABC_DLL Abc_Ntk_t * Abc_NtkCreateMffc( Abc_Ntk_t * pNtk, Abc_Obj_t * pNode, char * pNodeName );
 ```
 
 ### ECTL (Under Development)
 
+The motivation of developing ECTL library is to create a interface of ABC using modern C++. Instead of C-style structures and functions, ECTL library uses `class Network` and `class Object`. The key idea of ECTL library is to provide an object-oriented, easy-to-use framework for users to implement and test their ideas on the area of approximate logic synthesis.
+
+Currently, ECTL library is still under development. The current major issue is that `class Network` and `class Object` are constructed based on `struct Abc_Ntk_t` and `struct Abc_Obj_t`. When methods, like approximate local changes, can result in changes in network topology, the topology of `class Network` also need to be renewed. Reconstructing the whole network based on the changed `struct Abc_Ntk_t` is too inefficient. Local changes on the topology of `class Network` need to be implemented to resolve this issue.
 
 ### Playground
+
+The demo program in `playground` directory is a simple example of approximate substitution. The signal 23GAT is replaced with the inverted signal 19GAT. The error rate of the resulted approximate circuit is obtained through logic simulations. Then the approximate network is recovered to its original topology.
+
+```cpp
+auto origin_ntk = std::make_shared<Network>();
+origin_ntk->ReadBlifLogic(benchmark_path.string());
+auto approx_ntk = origin_ntk->Duplicate();
+
+auto target_node     = approx_ntk->GetNodebyName("23GAT(9)");
+auto target_node_bak = origin_ntk->GetObjbyID(target_node->GetID());
+auto sub_node        = approx_ntk->GetNodebyName("19GAT(7)");
+
+auto sub_inv = approx_ntk->CreateInverter(sub_node);
+
+approx_ntk->ReplaceObj(target_node, sub_inv);
+
+std::cout << SimErrorRate(origin_ntk, approx_ntk, true);
+
+approx_ntk->DeleteObj(sub_inv);
+approx_ntk->RecoverObjFrom(target_node_bak);
+
+std::cout << SimErrorRate(origin_ntk, approx_ntk, true);
+```
 
 ## Reference
 
