@@ -71,8 +71,9 @@ namespace abc {
         // copy the internal nodes
         if (Abc_NtkIsStrash(pNtk)) {
             // copy the AND gates
-            Abc_AigForEachAnd(pNtk, pObj, i)pObj->pCopy = Abc_AigAnd((Abc_Aig_t *) pNtkNew->pManFunc,
-                                                                     Abc_ObjChild0Copy(pObj), Abc_ObjChild1Copy(pObj));
+            Abc_AigForEachAnd(pNtk, pObj, i)
+                    pObj->pCopy = Abc_AigAnd((Abc_Aig_t *) pNtkNew->pManFunc,
+                                             Abc_ObjChild0Copy(pObj), Abc_ObjChild1Copy(pObj));
             // relink the choice nodes
             Abc_AigForEachAnd(pNtk, pObj, i) if (pObj->pData)
                     pObj->pCopy->pData = ((Abc_Obj_t *) pObj->pData)->pCopy;
@@ -127,6 +128,8 @@ namespace ECTL {
 
     int Object::GetID() { return abc::Abc_ObjId(abc_obj_); }
 
+    NetworkPtr Object::GetHostNetwork() { return host_ntk_; }
+
     std::vector<ObjectPtr> Object::GetFanins() {
         assert(renewed);
         return fan_ins_;
@@ -153,6 +156,8 @@ namespace ECTL {
     bool Object::IsNode() { return (bool) abc::Abc_ObjIsNode(abc_obj_); }
 
     bool Object::IsInverter() { return (bool) abc::Abc_NodeIsInv(abc_obj_); }
+
+    bool Object::IsConst() { return (bool) abc::Abc_NodeIsConst(abc_obj_); }
 
     void Object::SopSimulate() { SetiTemp(abc::Abc_ObjSopSimulate(abc_obj_)); }
 
@@ -227,7 +232,7 @@ namespace ECTL {
         abc_ntk_->pName = abc::Extra_UtilStrsav((char *) new_name.c_str());
     }
 
-    ObjectPtr Network::GetObjbyID(int id) { return objs_[id - 1]; }
+    ObjectPtr Network::GetObjbyID(int id) { return objs_.at(id); }
 
     std::vector<ObjectPtr> Network::GetObjs() {
         return objs_;
@@ -313,10 +318,10 @@ namespace ECTL {
         nodes_.clear();
         pis_.clear();
         pos_.clear();
+        for (int t = 0; t <= abc::Abc_NtkObjNumMax(abc_ntk_); t++) objs_.push_back(nullptr);
         Abc_NtkForEachObj(abc_ntk_, abc_obj, i) {
                 auto obj = std::make_shared<Object>(abc_obj, shared_from_this());
-                assert(objs_.size() == abc::Abc_ObjId(abc_obj) - 1);
-                objs_.push_back(obj);
+                objs_.at(abc::Abc_ObjId(abc_obj)) = obj;
 
                 if (abc::Abc_ObjIsNode(abc_obj))
                     nodes_.push_back(obj);
@@ -327,7 +332,8 @@ namespace ECTL {
             }
 
         for (const auto &obj : objs_) {
-            obj->Renew();
+            if (obj != nullptr)
+                obj->Renew();
         }
         renewed = true;
     }

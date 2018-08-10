@@ -36,7 +36,11 @@ namespace ECTL {
 
         bool IsInverter();
 
+        bool IsConst();
+
         int GetID();
+
+        NetworkPtr GetHostNetwork();
 
         ObjectPtr GetObjbyID(int id);
 
