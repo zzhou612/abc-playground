@@ -2,24 +2,172 @@
 
 Personal playground for ABC (System for Sequential Logic Synthesis and Formal Verification)
 
-### Prerequisites
+## Prerequisites
+### macOS
 
-The `gcc` alias on macOS is actually `clang`. For compatibility, I choose to use GNU `gcc` instead of `clang` provided by macOS.
-So first, I need to install `gcc` using `homebrew`.
+The `gcc` alias on macOS is actually `clang`. For compatibility, GNU `gcc`, instead of `clang` provided by macOS, is taken into use.
+
+First, install `gcc` using `homebrew`.
 
 ```bash
 brew install gcc@6
 ```
 
-Since I am also using `filesystem` in Boost C++ Libraries, I also need to install `boost`
-via `homebrew`. Make sure that `--cc=gcc-6` flag is added for the installation command. 
+Install `boost` via `homebrew`. Make sure that `--cc=gcc-6` flag is added for the installation command. 
 Otherwise `clang` compiled version will be installed and strange mistakes will happen.
 
 ```bash
 brew install boost --cc=gcc-6
 ```
 
+### Ubuntu 18.04
 
-### Reference
+Install the latest version of `boost` library.
+```bash
+sudo apt install libboost-all-dev
+```
+
+## Getting Started
+
+### Project Structure
+
+
+- ectl: ECTL library (under development)
+- ext-lib: external libraries
+  - include: header files
+  - lib: built static library files
+- playground: demos
+
+### Install ABC
+
+By building `install_abc` in `ext-lib` subdirectory, the source codes of ABC will be automatically pulled and compiled from the official Github repository. All the header files will be injected into `ext-lib/include`. The static library `libabc.a` will be put into `ext-lib/lib`.
+
+For Darwin based operating system (macOS), ABC is compiled by `g++-6`. For Linux, the compiler is  `g++`. ABC is compiled as C++ code with namespace `abc`. For details on the compilation and installation of ABC, please check the corresponding `CMakeLists` file and `externalproject_add` configuration.
+
+### ABC Basics
+
+In ECTL, ABC is used as a static library. The basic interface and external declarations of ABC can be found in `base/abc/abc.h`. ABC is written in C. ABC supports a wide range of representations of circuits. In general, gate and circuit are abstracted as object and network: two basic data structures, `struct Abc_Obj_t` and `struct Abc_Ntk_t`, are used to store circuits.
+
+
+#### Abc_Obj_t
+
+`struct Abc_Obj_t` is used to store the objects in the network. In different representations of circuits, the term `object` can represent different entities. The object type is represented by a 4-bit unsigned integer, which is showed in the enumerate variable Abc_ObjType_t:
+
+```c
+typedef enum { 
+    ...
+    ABC_OBJ_CONST1,     //  1:  constant 1 node (AIG only)
+    ABC_OBJ_PI,         //  2:  primary input terminal
+    ABC_OBJ_PO,         //  3:  primary output terminal
+    ...
+    ABC_OBJ_NET,        //  6:  net
+    ABC_OBJ_NODE,       //  7:  node
+    ...
+} Abc_ObjType_t;
+```
+
+Take a glimpse at `struct Abc_Obj_t`:
+
+```c
+struct Abc_Obj_t_
+{
+    Abc_Ntk_t *       pNtk;          // the host network
+    Abc_Obj_t *       pNext;         // the next pointer in the hash table
+    int               Id;            // the object ID
+    unsigned          Type    :  4;  // the object type
+    ...
+    Vec_Int_t         vFanins;       // the array of fanins
+    Vec_Int_t         vFanouts;      // the array of fanouts
+    union { void *    pData;         // the network specific data
+      int             iData; };      // (SOP, BDD, gate, equiv class, etc)
+    union { void *    pTemp;         // temporary store for user's data
+      Abc_Obj_t *     pCopy;         // the copy of this object
+      int             iTemp;
+      float           dTemp; };
+};
+```
+
+There ary many members in `struct Abc_Obj_t`. It should be noticed that each object has a unique `ID`. And `vFanins`, `vFanouts` are the vectors storing the pointers that point to fan-in objects and fan-out objects respectively.
+
+`union` is used to store different data types in the same memory location. It is used to store different types of network-specific functionalities and multiple types of temporary values. 
+
+For example, the functionality of an object in a logic network can be stored in SOP (Sum of Product) form. And `iTemp` (temporary integer) can be used to store the output of a gate in the implementation of logic simulator.
+
+
+
+#### Abc_Ntk_t
+
+Network is the abstraction of circuit used by ABC. `struct Abc_Ntk_t` is the basic data structure to store a network:
+
+
+```c
+struct Abc_Ntk_t_ 
+{
+    // general information 
+    Abc_NtkType_t     ntkType;       // type of the network
+    Abc_NtkFunc_t     ntkFunc;       // functionality of the network
+    char *            pName;         // the network name
+    ...
+    // components of the network
+    Vec_Ptr_t *       vObjs;         // the array of all objects (net, nodes, latches, etc)
+    Vec_Ptr_t *       vPis;          // the array of primary inputs
+    Vec_Ptr_t *       vPos;          // the array of primary outputs
+    ...
+};
+```
+
+It should be noticed that every object in the network only has one instance. These instances can be accessed using the pointers stored in `Vec_Ptr_t` members.
+
+`struct Abc_Ntk_t` supports various network types and functionalities, which are showed in `Abc_NtkType_t` and `Abc_NtkFunc_t` respectively:
+
+```c
+typedef enum { 
+    ...
+    ABC_NTK_NETLIST,    // 1:  network with PIs/POs, latches, nodes, and nets
+    ABC_NTK_LOGIC,      // 2:  network with PIs/POs, latches, and nodes
+    ABC_NTK_STRASH,     // 3:  structurally hashed AIG (two input AND gates with c-attributes on edges)
+    ...
+} Abc_NtkType_t;
+
+typedef enum { 
+    ...
+    ABC_FUNC_SOP,       // 1:  sum-of-products
+    ABC_FUNC_BDD,       // 2:  binary decision diagrams
+    ABC_FUNC_AIG,       // 3:  and-inverter graphs
+    ABC_FUNC_MAP,       // 4:  standard cell library
+    ...
+} Abc_NtkFunc_t;
+```
+Supported type and functionality combinations are showed in the following table:
+
+|           |  SOP  |  BDD  |  AIG  |  Map  |
+|-----------|-------|-------|-------|-------|
+|  Netlist  |   x   |       |   x   |   x   |
+|  Logic    |   x   |   x   |   x   |   x   |
+|  Strash   |       |       |   x   |       |
+
+In the current version of ECTL, logic network with SOP functionality is used.
+
+####  Macros, Iterators and Functions
+
+Useful macros, iterators and functions can be found in `base/abc/abc.h`. Most of them are named properly, and their functionalities can be easily guessed out with their names and comments.
+
+For example, to iterate through all the objects in the target network, we can use:
+
+```c
+#define Abc_NtkForEachObj( pNtk, pObj, i ) \
+    ...
+```
+To transfer fanouts from one object to another, we can use:
+```c
+extern ABC_DLL void Abc_ObjTransferFanout( Abc_Obj_t * pObjOld, Abc_Obj_t * pObjNew );
+```
+
+### ECTL (Under Development)
+
+
+### Playground
+
+## Reference
 
 Berkeley Logic Synthesis and Verification Group, ABC: A System for Sequential Synthesis and Verification. http://www.eecs.berkeley.edu/~alanmi/abc/
