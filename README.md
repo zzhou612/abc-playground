@@ -51,7 +51,7 @@ In ECTL, ABC is used as a static library. The basic interface and external decla
 
 #### Abc_Obj_t
 
-`struct Abc_Obj_t` is used to store the objects in the network. In different representations of circuits, the term `object` can represent different entities. The object type is represented by a 4-bit unsigned integer, which is showed in the enumerate variable Abc_ObjType_t:
+`struct Abc_Obj_t` is used to store the objects in the network. In different representations of circuits, the term `object` can represent different entities. The object type is represented by a 4-bit unsigned integer, which is shown in the enumerate variable Abc_ObjType_t:
 
 ```c
 typedef enum { 
@@ -118,7 +118,7 @@ struct Abc_Ntk_t_
 
 It should be noticed that every object in the network only has one instance. These instances can be accessed using the pointers stored in `Vec_Ptr_t` members.
 
-`struct Abc_Ntk_t` supports various network types and functionalities, which are showed in `Abc_NtkType_t` and `Abc_NtkFunc_t` respectively:
+`struct Abc_Ntk_t` supports various network types and functionalities, which are shown in `Abc_NtkType_t` and `Abc_NtkFunc_t` respectively:
 
 ```c
 typedef enum { 
@@ -138,7 +138,7 @@ typedef enum {
     ...
 } Abc_NtkFunc_t;
 ```
-Supported type and functionality combinations are showed in the following table:
+Supported type and functionality combinations are shown in the following table:
 
 |           |  SOP  |  BDD  |  AIG  |  Map  |
 |-----------|-------|-------|-------|-------|
