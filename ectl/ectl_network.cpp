@@ -71,8 +71,9 @@ namespace abc {
         // copy the internal nodes
         if (Abc_NtkIsStrash(pNtk)) {
             // copy the AND gates
-            Abc_AigForEachAnd(pNtk, pObj, i)pObj->pCopy = Abc_AigAnd((Abc_Aig_t *) pNtkNew->pManFunc,
-                                                                     Abc_ObjChild0Copy(pObj), Abc_ObjChild1Copy(pObj));
+            Abc_AigForEachAnd(pNtk, pObj, i)
+                    pObj->pCopy = Abc_AigAnd((Abc_Aig_t *) pNtkNew->pManFunc,
+                                             Abc_ObjChild0Copy(pObj), Abc_ObjChild1Copy(pObj));
             // relink the choice nodes
             Abc_AigForEachAnd(pNtk, pObj, i) if (pObj->pData)
                     pObj->pCopy->pData = ((Abc_Obj_t *) pObj->pData)->pCopy;
@@ -115,7 +116,7 @@ namespace abc {
 namespace ECTL {
     std::string Object::GetName() { return std::string(Abc_ObjName(abc_obj_)); }
 
-    ObjectPtr Object::GetObjbyID(unsigned int id) { return host_ntk_->GetObjbyID(id); }
+    ObjectPtr Object::GetObjbyID(int id) { return host_ntk_->GetObjbyID(id); }
 
     ObjectPtr Object::GetFanin0() {
         assert(renewed);
@@ -127,7 +128,7 @@ namespace ECTL {
         return fan_ins_[1];
     }
 
-    unsigned int Object::GetID() { return abc::Abc_ObjId(abc_obj_); }
+    int Object::GetID() { return abc::Abc_ObjId(abc_obj_); }
 
     NetworkPtr Object::GetHostNetwork() { return host_ntk_; }
 
@@ -174,7 +175,7 @@ namespace ECTL {
 
 
     void Object::Renew() {
-        unsigned int fan_in_id, fan_out_id, i;
+        int fan_in_id, fan_out_id, i;
         fan_ins_.clear();
         fan_outs_.clear();
 
@@ -236,7 +237,7 @@ namespace ECTL {
         abc_ntk_->pName = abc::Extra_UtilStrsav((char *) new_name.c_str());
     }
 
-    ObjectPtr Network::GetObjbyID(unsigned int id) { return objs_.at(id); }
+    ObjectPtr Network::GetObjbyID(int id) { return objs_.at((unsigned) id); }
 
     std::vector<ObjectPtr> Network::GetObjs() {
         return objs_;

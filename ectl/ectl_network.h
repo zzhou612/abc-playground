@@ -38,11 +38,11 @@ namespace ECTL {
 
         bool IsConst();
 
-        unsigned int GetID();
+        int GetID();
 
         NetworkPtr GetHostNetwork();
 
-        ObjectPtr GetObjbyID(unsigned int id);
+        ObjectPtr GetObjbyID(int id);
 
         ObjectPtr GetFanin0();
 
@@ -93,7 +93,7 @@ namespace ECTL {
 
         std::vector<ObjectPtr> GetPIsNodes();
 
-        ObjectPtr GetObjbyID(unsigned int id);
+        ObjectPtr GetObjbyID(int id);
 
         ObjectPtr GetPrimaryInputbyName(std::string name);
 
