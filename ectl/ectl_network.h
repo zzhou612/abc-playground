@@ -38,11 +38,11 @@ namespace ECTL {
 
         bool IsConst();
 
-        int GetID();
+        unsigned int GetID();
 
         NetworkPtr GetHostNetwork();
 
-        ObjectPtr GetObjbyID(int id);
+        ObjectPtr GetObjbyID(unsigned int id);
 
         ObjectPtr GetFanin0();
 
@@ -93,7 +93,7 @@ namespace ECTL {
 
         std::vector<ObjectPtr> GetPIsNodes();
 
-        ObjectPtr GetObjbyID(int id);
+        ObjectPtr GetObjbyID(unsigned int id);
 
         ObjectPtr GetPrimaryInputbyName(std::string name);
 
@@ -118,6 +118,8 @@ namespace ECTL {
         ~Network();
 
     private:
+        ObjectPtr _AddAbcObject(abc::Abc_Obj_t *abc_obj, bool renew=true);
+
         abc::Abc_Ntk_t *abc_ntk_;
         bool           renewed;
 
