@@ -56,14 +56,14 @@ namespace abc {
         // transfer HAIG
 //    pObjNew->pEquiv = pObj->pEquiv;
         // remember the new node in the old node
-        pObj->pCopy        = pObjNew;
+        pObj->pCopy = pObjNew;
         return pObjNew;
     }
 
     static Abc_Ntk_t *ECTL_Abc_NtkDup(Abc_Ntk_t *pNtk) {
         Abc_Ntk_t *pNtkNew;
         Abc_Obj_t *pObj, *pFanin;
-        int       i, k;
+        int i, k;
         if (pNtk == NULL)
             return NULL;
         // start the network
@@ -71,9 +71,8 @@ namespace abc {
         // copy the internal nodes
         if (Abc_NtkIsStrash(pNtk)) {
             // copy the AND gates
-            Abc_AigForEachAnd(pNtk, pObj, i)
-                    pObj->pCopy = Abc_AigAnd((Abc_Aig_t *) pNtkNew->pManFunc,
-                                             Abc_ObjChild0Copy(pObj), Abc_ObjChild1Copy(pObj));
+            Abc_AigForEachAnd(pNtk, pObj, i)pObj->pCopy = Abc_AigAnd((Abc_Aig_t *) pNtkNew->pManFunc,
+                                                                     Abc_ObjChild0Copy(pObj), Abc_ObjChild1Copy(pObj));
             // relink the choice nodes
             Abc_AigForEachAnd(pNtk, pObj, i) if (pObj->pData)
                     pObj->pCopy->pData = ((Abc_Obj_t *) pObj->pData)->pCopy;
@@ -93,7 +92,44 @@ namespace abc {
         }
         // duplicate the EXDC Ntk
         if (pNtk->pExdc)
-            pNtkNew->pExdc   = Abc_NtkDup(pNtk->pExdc);
+            pNtkNew->pExdc = Abc_NtkDup(pNtk->pExdc);
+        if (pNtk->pExcare)
+            pNtkNew->pExcare = Abc_NtkDup((Abc_Ntk_t *) pNtk->pExcare);
+        // duplicate timing manager
+        if (pNtk->pManTime)
+            Abc_NtkTimeInitialize(pNtkNew, pNtk);
+        if (pNtk->vPhases)
+            Abc_NtkTransferPhases(pNtkNew, pNtk);
+        if (pNtk->pWLoadUsed)
+            pNtkNew->pWLoadUsed = Abc_UtilStrsav(pNtk->pWLoadUsed);
+        // check correctness
+        if (!Abc_NtkCheck(pNtkNew))
+            fprintf(stdout, "Abc_NtkDup(): Network check has failed.\n");
+        pNtk->pCopy = pNtkNew;
+        return pNtkNew;
+    }
+
+    static Abc_Ntk_t *ECTL_Abc_NtkDupDfs(Abc_Ntk_t *pNtk) {
+        Vec_Ptr_t *vNodes;
+        Abc_Ntk_t *pNtkNew;
+        Abc_Obj_t *pObj, *pFanin;
+        int i, k;
+        if (pNtk == NULL)
+            return NULL;
+        assert(!Abc_NtkIsStrash(pNtk) && !Abc_NtkIsNetlist(pNtk));
+        // start the network
+        pNtkNew = Abc_NtkStartFrom(pNtk, pNtk->ntkType, pNtk->ntkFunc);
+        // copy the internal nodes
+        vNodes = Abc_NtkDfs(pNtk, 0);
+        Vec_PtrForEachEntry(Abc_Obj_t *, vNodes, pObj, i)ECTL_Abc_NtkDupObj(pNtkNew, pObj, 1);
+        Vec_PtrFree(vNodes);
+        // reconnect all objects (no need to transfer attributes on edges)
+        Abc_NtkForEachObj(pNtk, pObj, i) if (!Abc_ObjIsBox(pObj) && !Abc_ObjIsBo(pObj))
+                Abc_ObjForEachFanin(pObj, pFanin, k)if (pObj->pCopy && pFanin->pCopy)
+                        Abc_ObjAddFanin(pObj->pCopy, pFanin->pCopy);
+        // duplicate the EXDC Ntk
+        if (pNtk->pExdc)
+            pNtkNew->pExdc = Abc_NtkDup(pNtk->pExdc);
         if (pNtk->pExcare)
             pNtkNew->pExcare = Abc_NtkDup((Abc_Ntk_t *) pNtk->pExcare);
         // duplicate timing manager
@@ -202,6 +238,12 @@ namespace ECTL {
 
     NetworkPtr Network::Duplicate(bool renew) {
         auto dup_ntk = std::make_shared<Network>(abc::ECTL_Abc_NtkDup(abc_ntk_));
+        if (renew) dup_ntk->Renew();
+        return dup_ntk;
+    }
+
+    NetworkPtr Network::DuplicateDFS(bool renew) {
+        auto dup_ntk = std::make_shared<Network>(abc::ECTL_Abc_NtkDupDfs(abc_ntk_));
         if (renew) dup_ntk->Renew();
         return dup_ntk;
     }
@@ -325,7 +367,7 @@ namespace ECTL {
 
     void Network::Renew() {
         abc::Abc_Obj_t *abc_obj;
-        int            i;
+        int i;
         objs_.clear();
         nodes_.clear();
         pis_.clear();

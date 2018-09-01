@@ -11,9 +11,9 @@ using namespace ECTL;
 
 int main() {
     path project_source_dir(PROJECT_SOURCE_DIR);
-    path benchmark_dir  = project_source_dir / "benchmark";
+    path benchmark_dir = project_source_dir / "benchmark";
     path benchmark_path = benchmark_dir / "C17.blif";
-    path mffc_path      = benchmark_dir / "mffc.blif";
+    path mffc_path = benchmark_dir / "mffc.blif";
 
     auto origin_ntk = std::make_shared<Network>();
     origin_ntk->ReadBlifLogic(benchmark_path.string());
@@ -35,9 +35,9 @@ int main() {
         std::cout << node->GetID() << "-" << node->GetName() << " ";
     std::cout << std::endl;
 
-    auto target_node     = approx_ntk->GetNodebyName("G23gat");
+    auto target_node = approx_ntk->GetNodebyName("G23gat");
     auto target_node_bak = origin_ntk->GetObjbyID(target_node->GetID());
-    auto sub_node        = approx_ntk->GetNodebyName("G19gat");
+    auto sub_node = approx_ntk->GetNodebyName("G19gat");
 
     auto sub_inv = approx_ntk->CreateInverter(sub_node);
 

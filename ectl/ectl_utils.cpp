@@ -52,7 +52,7 @@ namespace abc {
         // transfer HAIG
 //    pObjNew->pEquiv = pObj->pEquiv;
         // remember the new node in the old node
-        pObj->pCopy        = pObjNew;
+        pObj->pCopy = pObjNew;
         return pObjNew;
     }
 
@@ -61,8 +61,8 @@ namespace abc {
         Abc_Ntk_t *pNtkNew;
         Abc_Obj_t *pObj, *pFanin, *pNodeCoNew;
         Vec_Ptr_t *vCone, *vSupp;
-        char      Buffer[1000];
-        int       i, k;
+        char Buffer[1000];
+        int i, k;
 
         assert(Abc_NtkIsLogic(pNtk) || Abc_NtkIsStrash(pNtk));
         assert(Abc_ObjIsNode(pNode));
@@ -115,7 +115,7 @@ namespace abc {
 
 namespace ECTL {
     std::vector<ObjectPtr> TopologicalSort(const NetworkPtr &ntk) {
-        abc::Vec_Ptr_t         *abc_objs = abc::Abc_NtkDfs(ntk->_Get_Abc_Ntk(), 0);
+        abc::Vec_Ptr_t *abc_objs = abc::Abc_NtkDfs(ntk->_Get_Abc_Ntk(), 0);
         std::vector<ObjectPtr> sorted_objs;
 
         for (int i = 0; i < abc_objs->nSize; ++i) {
@@ -148,7 +148,7 @@ namespace ECTL {
         using namespace abc;
         Vec_Ptr_t *vCone, *vSupp;
         Abc_Obj_t *pObj;
-        int       i;
+        int i;
         vCone = Vec_PtrAlloc(100);
         vSupp = Vec_PtrAlloc(100);
         Abc_NodeDeref_rec(node->_Get_Abc_Obj());
@@ -164,9 +164,9 @@ namespace ECTL {
 
     std::vector<ObjectPtr> GetMFFCNodes(const ObjectPtr &node) {
         std::vector<ObjectPtr> mffc;
-        abc::Vec_Ptr_t         *vCone, *vSupp;
-        abc::Abc_Obj_t         *pObj;
-        int                    i;
+        abc::Vec_Ptr_t *vCone, *vSupp;
+        abc::Abc_Obj_t *pObj;
+        int i;
         vCone = abc::Vec_PtrAlloc(100);
         vSupp = abc::Vec_PtrAlloc(100);
         abc::Abc_NodeDeref_rec(node->_Get_Abc_Obj());
@@ -182,9 +182,9 @@ namespace ECTL {
 
     std::vector<ObjectPtr> GetMFFCInputs(const ObjectPtr &node) {
         std::vector<ObjectPtr> inputs;
-        abc::Vec_Ptr_t         *vCone, *vSupp;
-        abc::Abc_Obj_t         *pObj;
-        int                    i;
+        abc::Vec_Ptr_t *vCone, *vSupp;
+        abc::Abc_Obj_t *pObj;
+        int i;
         vCone = abc::Vec_PtrAlloc(100);
         vSupp = abc::Vec_PtrAlloc(100);
         abc::Abc_NodeDeref_rec(node->_Get_Abc_Obj());

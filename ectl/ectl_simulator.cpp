@@ -13,15 +13,15 @@ namespace ECTL {
 
     double
     SimErrorRate(const NetworkPtr &origin_ntk, const NetworkPtr &approx_ntk, bool show_progress_bar, int sim_time) {
-        std::default_random_engine         generator(
+        std::default_random_engine generator(
                 (unsigned) std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> distribution(0, 1);
-        auto                               dice = std::bind(distribution, generator);
+        auto dice = std::bind(distribution, generator);
 
         assert(abc::Abc_NtkIsSopLogic(origin_ntk->_Get_Abc_Ntk()));
         assert(abc::Abc_NtkIsSopLogic(approx_ntk->_Get_Abc_Ntk()));
 
-        int                     err = 0;
+        int err = 0;
         boost::progress_display *pd = nullptr;
         if (show_progress_bar)
             pd = new boost::progress_display((unsigned long) sim_time);
@@ -76,11 +76,11 @@ namespace ECTL {
             truth_vec.at(obj).reserve(sim_time);
         }
 
-        std::default_random_engine         generator(
+        std::default_random_engine generator(
                 (unsigned) std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> distribution(0, 1);
-        boost::progress_display            *pd  = nullptr;
-        auto                               dice = std::bind(distribution, generator);
+        boost::progress_display *pd = nullptr;
+        auto dice = std::bind(distribution, generator);
         assert(abc::Abc_NtkIsSopLogic(ntk->_Get_Abc_Ntk()));
         if (show_progress_bar)
             pd = new boost::progress_display((unsigned long) sim_time);
@@ -105,10 +105,10 @@ namespace ECTL {
     }
 
     void SimTest(NetworkPtr ntk) {
-        std::default_random_engine         generator(
+        std::default_random_engine generator(
                 (unsigned) std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> distribution(0, 1);
-        auto                               dice = std::bind(distribution, generator);
+        auto dice = std::bind(distribution, generator);
 
         assert(abc::Abc_NtkIsSopLogic(ntk->_Get_Abc_Ntk()));
         for (auto &pi : ntk->GetPrimaryInputs())

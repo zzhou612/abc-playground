@@ -62,9 +62,8 @@ namespace ECTL {
 
     private:
         abc::Abc_Obj_t *abc_obj_;
-        bool           renewed;
-
-        NetworkPtr             host_ntk_;
+        bool renewed;
+        NetworkPtr host_ntk_;
         std::vector<ObjectPtr> fan_ins_;
         std::vector<ObjectPtr> fan_outs_;
     };
@@ -80,6 +79,8 @@ namespace ECTL {
         void SetName(const std::string &new_name);
 
         NetworkPtr Duplicate(bool renew = true);
+
+        NetworkPtr DuplicateDFS(bool renew = true);
 
         std::string GetName();
 
@@ -118,11 +119,10 @@ namespace ECTL {
         ~Network();
 
     private:
-        ObjectPtr _AddAbcObject(abc::Abc_Obj_t *abc_obj, bool renew=true);
+        ObjectPtr _AddAbcObject(abc::Abc_Obj_t *abc_obj, bool renew = true);
 
         abc::Abc_Ntk_t *abc_ntk_;
-        bool           renewed;
-
+        bool renewed;
         std::vector<ObjectPtr> objs_;
         std::vector<ObjectPtr> nodes_;
         std::vector<ObjectPtr> pis_;
