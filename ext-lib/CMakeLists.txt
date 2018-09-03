@@ -12,7 +12,7 @@ file(MAKE_DIRECTORY ${ext_include})
 file(MAKE_DIRECTORY ${ext_lib})
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    set(compiler g++-6)
+    set(compiler g++-8)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(compiler g++)
 endif ()

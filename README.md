@@ -10,14 +10,14 @@ The `gcc` alias on macOS is actually `clang`. For compatibility, GNU `gcc`, inst
 First, install `gcc` using `homebrew`.
 
 ```bash
-brew install gcc@6
+brew install gcc@8
 ```
 
-Install `boost` via `homebrew`. Make sure that `--cc=gcc-6` flag is added for the installation command. 
+Install `boost` via `homebrew`. Make sure that `--cc=gcc-8` flag is added for the installation command. 
 Otherwise `clang` compiled version will be installed and strange mistakes will happen.
 
 ```bash
-brew install boost --cc=gcc-6
+brew install boost --cc=gcc-8
 ```
 
 ### Ubuntu 18.04
