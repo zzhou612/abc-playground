@@ -1,12 +1,7 @@
 #include <iostream>
-#include <abc_api.h>
 #include <ectl_network.h>
-#include "ectl_network.h"
-
 
 namespace abc {
-    int Abc_ObjSopSimulate(Abc_Obj_t *pObj);
-
     // copying the node's name as expected
     static Abc_Obj_t *ECTL_Abc_NtkDupObj(Abc_Ntk_t *pNtkNew, Abc_Obj_t *pObj, int fCopyName) {
         Abc_Obj_t *pObjNew;
@@ -150,39 +145,121 @@ namespace abc {
 }
 
 namespace ECTL {
+    std::ostream &operator<<(std::ostream &os, GateType gt) {
+        switch (gt) {
+            case GateType::CONST0:
+                os << "CONST0";
+                break;
+            case GateType::CONST1:
+                os << "CONST1";
+                break;
+            case GateType::AND:
+                os << "AND";
+                break;
+            case GateType::INV:
+                os << "INV";
+                break;
+            default:
+                os.setstate(std::ios_base::failbit);
+        }
+        return os;
+    }
+
+    std::ostream &operator<<(std::ostream &os, AndType at) {
+        switch (at) {
+            case AndType::AND0:
+                os << "AND0";
+                break;
+            case AndType::AND1:
+                os << "AND1";
+                break;
+            case AndType::AND2:
+                os << "AND2";
+                break;
+            case AndType::AND3:
+                os << "AND3";
+                break;
+            default:
+                os.setstate(std::ios_base::failbit);
+        }
+        return os;
+    }
+
     std::string Object::GetName() { return std::string(Abc_ObjName(abc_obj_)); }
+
+    GateType Object::GetGateType() {
+        return gate_type_;
+    }
+
+    int Object::GetiTemp() { return abc_obj_->iTemp; }
+
+    void Object::SetiTemp(int val) { abc_obj_->iTemp = val; }
+
+    void Object::_SopSimulate() { SetiTemp(abc::Abc_ObjSopSimulate(abc_obj_)); }
+
+    int Object::GetVal() { return val_; }
+
+    void Object::SetVal(int val) { val_ = val; }
+
+    void Object::Simulate() {
+        switch (gate_type_) {
+            case GateType::CONST0:
+                SetVal(0);
+                break;
+            case GateType::CONST1:
+                SetVal(1);
+                break;
+            case GateType::AND: {
+                int input0 = GetFanin0()->GetVal();
+                int input1 = GetFanin1()->GetVal();
+                switch (and_type_) {
+                    case AndType::AND0:
+                        break;
+                    case AndType::AND1:
+                        break;
+                    case AndType::AND2:
+                        break;
+                    case AndType::AND3:
+                        break;
+                }
+                break;
+            }
+            case GateType::INV:
+                SetVal(~GetFanin0()->GetVal());
+                break;
+        }
+
+    }
 
     ObjectPtr Object::GetObjbyID(int id) { return host_ntk_->GetObjbyID(id); }
 
     ObjectPtr Object::GetFanin0() {
-        assert(renewed);
+        assert(renewed_);
         return fan_ins_[0];
     }
 
     ObjectPtr Object::GetFanin1() {
-        assert(renewed);
+        assert(renewed_);
         return fan_ins_[1];
     }
 
-    int Object::GetID() { return abc::Abc_ObjId(abc_obj_); }
+    unsigned int Object::GetID() { return id_; }
 
     NetworkPtr Object::GetHostNetwork() { return host_ntk_; }
 
     std::vector<ObjectPtr> Object::GetFanins() {
-        assert(renewed);
+        assert(renewed_);
         return fan_ins_;
     }
 
     std::vector<ObjectPtr> Object::GetFanouts() {
-        assert(renewed);
+        assert(renewed_);
         return fan_outs_;
     }
 
     bool Object::IsPrimaryInput() { return (bool) abc::Abc_ObjIsPi(abc_obj_); }
 
     bool Object::IsPrimaryOutput() { return (bool) abc::Abc_ObjIsPo(abc_obj_); }
-
-    abc::Abc_Obj_t *Object::_Get_Abc_Obj() { return abc_obj_; }
 
     bool Object::IsPrimaryOutputNode() {
         for (auto &fan_out : GetFanouts())
@@ -193,22 +270,11 @@ namespace ECTL {
 
     bool Object::IsNode() { return (bool) abc::Abc_ObjIsNode(abc_obj_); }
 
-    bool Object::IsInverter() { return (bool) abc::Abc_NodeIsInv(abc_obj_); }
+    bool Object::IsInverter() { return (bool) (gate_type_ == GateType::INV); }
 
-    bool Object::IsConst() { return (bool) abc::Abc_NodeIsConst(abc_obj_); }
+    bool Object::IsConst() { return (bool) (gate_type_ == GateType::CONST0 || gate_type_ == GateType::CONST1); }
 
-    void Object::SopSimulate() { SetiTemp(abc::Abc_ObjSopSimulate(abc_obj_)); }
-
-    int Object::GetiTemp() { return abc_obj_->iTemp; }
-
-    void Object::SetiTemp(int val) { abc_obj_->iTemp = val; }
-
-    Object::Object(abc::Abc_Obj_t *abc_node) : abc_obj_(abc_node), renewed(false) {}
-
-    Object::Object(abc::Abc_Obj_t *abc_node, NetworkPtr host_ntk) : abc_obj_(abc_node),
-                                                                    renewed(false),
-                                                                    host_ntk_(std::move(host_ntk)) {}
-
+    abc::Abc_Obj_t *Object::_Get_Abc_Obj() { return abc_obj_; }
 
     void Object::Renew() {
         int fan_in_id, fan_out_id, i;
@@ -223,7 +289,28 @@ namespace ECTL {
             fan_outs_.push_back(host_ntk_->GetObjbyID(fan_out_id));
         }
 
-        renewed = true;
+        renewed_ = true;
+    }
+
+    Object::Object(abc::Abc_Obj_t *abc_node) : id_(abc::Abc_ObjId(abc_node)), abc_obj_(abc_node), renewed_(false) {
+        if (IsNode()) {
+            char *pSop = (char *) abc_node->pData;
+            is_on_set_ = (bool) abc::Abc_SopIsComplement(pSop);
+            if (abc::Abc_SopIsConst0(pSop))
+                gate_type_ = GateType::CONST0;
+            else if (abc::Abc_SopIsConst1(pSop))
+                gate_type_ = GateType::CONST1;
+            else if (abc::Abc_SopIsInv(pSop))
+                gate_type_ = GateType::INV;
+            else {
+                gate_type_ = GateType::AND;
+                and_type_ = (AndType) ((int) AndType::AND0 + (pSop[0] - '0') * 2 + (pSop[1] - '0'));
+            }
+        }
+    }
+
+    Object::Object(abc::Abc_Obj_t *abc_node, NetworkPtr host_ntk) : Object(abc_node) {
+        host_ntk_ = std::move(host_ntk);
     }
 
     void Network::ReadBlifLogic(const std::string &ifile, bool renew) {
@@ -327,7 +414,7 @@ namespace ECTL {
 //        obj_old->Renew();
 //        for (const auto &fan_out : obj_new->GetFanouts())
 //            fan_out->Renew();
-//        renewed = true;
+//        renewed_ = true;
         Renew();
     }
 
@@ -353,7 +440,6 @@ namespace ECTL {
         Renew();
     }
 
-
     ObjectPtr Network::CreateInverter(ObjectPtr fan_in) {
         auto abc_inv = abc::Abc_NtkCreateNodeInv(abc_ntk_, fan_in->_Get_Abc_Obj());
         renewed = false;
@@ -361,7 +447,6 @@ namespace ECTL {
         renewed = true;
         return GetObjbyID(abc::Abc_ObjId(abc_inv));
     }
-
 
     abc::Abc_Ntk_t *Network::_Get_Abc_Ntk() { return abc_ntk_; }
 
@@ -383,12 +468,6 @@ namespace ECTL {
         renewed = true;
     }
 
-    Network::Network() : renewed(false) {};
-
-    Network::Network(abc::Abc_Ntk_t *abc_ntk) : abc_ntk_(abc_ntk), renewed(false) {}
-
-    Network::~Network() { abc::Abc_NtkDelete(abc_ntk_); }
-
     ObjectPtr Network::_AddAbcObject(abc::Abc_Obj_t *abc_obj, bool renew) {
         auto obj = std::make_shared<Object>(abc_obj, shared_from_this());
         objs_.at(abc::Abc_ObjId(abc_obj)) = obj;
@@ -402,4 +481,10 @@ namespace ECTL {
             obj->Renew();
         return obj;
     }
+
+    Network::Network() : renewed(false) {};
+
+    Network::Network(abc::Abc_Ntk_t *abc_ntk) : abc_ntk_(abc_ntk), renewed(false) {}
+
+    Network::~Network() { abc::Abc_NtkDelete(abc_ntk_); }
 }

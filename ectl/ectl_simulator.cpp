@@ -2,12 +2,7 @@
 #include <chrono>
 #include <functional>
 #include <boost/progress.hpp>
-
 #include <ectl_simulator.h>
-
-namespace abc {
-    int Abc_ObjSopSimulate(Abc_Obj_t *pObj);
-}
 
 namespace ECTL {
 
@@ -40,13 +35,13 @@ namespace ECTL {
 
             for (const auto &obj : TopologicalSort(origin_ntk))
                 if (obj->IsNode())
-                    obj->SopSimulate();
+                    obj->_SopSimulate();
             for (const auto &po : origin_ntk->GetPrimaryOutputs())
                 po->SetiTemp(po->GetFanin0()->GetiTemp());
 
             for (const auto &obj : TopologicalSort(approx_ntk))
                 if (obj->IsNode())
-                    obj->SopSimulate();
+                    obj->_SopSimulate();
             for (const auto &po : approx_ntk->GetPrimaryOutputs())
                 po->SetiTemp(po->GetFanin0()->GetiTemp());
 
@@ -96,7 +91,7 @@ namespace ECTL {
                     obj->SetiTemp(rand_val);
                     truth_vec[obj].push_back(obj->GetiTemp());
                 } else if (obj->IsNode()) {
-                    obj->SopSimulate();
+                    obj->_SopSimulate();
                     truth_vec[obj].push_back(obj->GetiTemp());
                 }
             }
@@ -113,8 +108,9 @@ namespace ECTL {
         assert(abc::Abc_NtkIsSopLogic(ntk->_Get_Abc_Ntk()));
         for (auto &pi : ntk->GetPrimaryInputs())
             pi->SetiTemp(dice());
-        for (auto &node : TopologicalSort(ntk))
-            node->SopSimulate();
+        for (auto &obj : TopologicalSort(ntk))
+            if (obj->IsNode())
+                obj->_SopSimulate();
         for (auto &po : ntk->GetPrimaryOutputs())
             po->SetiTemp(po->GetFanin0()->GetiTemp());
 

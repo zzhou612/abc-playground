@@ -1,8 +1,6 @@
 #include <ectl_utils.h>
 
 namespace abc {
-    int Abc_ObjSopSimulate(Abc_Obj_t *pObj);
-
     // copying the node's name as expected
     static Abc_Obj_t *ECTL_Abc_NtkDupObj(Abc_Ntk_t *pNtkNew, Abc_Obj_t *pObj, int fCopyName) {
         Abc_Obj_t *pObjNew;

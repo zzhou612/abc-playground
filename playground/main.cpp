@@ -9,7 +9,17 @@
 using namespace boost::filesystem;
 using namespace ECTL;
 
+void Test_1();
+
+void Test_2();
+
 int main() {
+//    Test_1();
+    Test_2();
+    return 0;
+}
+
+void Test_1() {
     path project_source_dir(PROJECT_SOURCE_DIR);
     path benchmark_dir = project_source_dir / "benchmark";
     path benchmark_path = benchmark_dir / "C17.blif";
@@ -18,6 +28,10 @@ int main() {
     auto origin_ntk = std::make_shared<Network>();
     origin_ntk->ReadBlifLogic(benchmark_path.string());
     auto approx_ntk = origin_ntk->Duplicate();
+
+    SimTest(approx_ntk);
+
+    std::cout << std::endl;
 
     for (const auto &pi : approx_ntk->GetPrimaryInputs())
         std::cout << pi->GetID() << "-" << pi->GetName() << " ";
@@ -49,6 +63,30 @@ int main() {
     approx_ntk->RecoverObjFrom(target_node_bak);
 
     std::cout << SimErrorRate(origin_ntk, approx_ntk, true);
+}
 
-    return 0;
+void Test_2() {
+    path project_source_dir(PROJECT_SOURCE_DIR);
+    path benchmark_dir = project_source_dir / "benchmark";
+    path benchmark_path = benchmark_dir / "C17.blif";
+    path out_path = benchmark_dir / "out.blif";
+
+    auto ntk = std::make_shared<Network>();
+    ntk->ReadBlifLogic(benchmark_path.string());
+
+    auto target_node = ntk->GetNodebyName("G23gat");
+    auto target_node_bak = ntk->GetObjbyID(target_node->GetID());
+    auto sub_node = ntk->GetNodebyName("G19gat");
+
+    auto sub_inv = ntk->CreateInverter(sub_node);
+
+    ntk->ReplaceObj(target_node, sub_inv);
+
+    ntk->WriteBlifLogic(out_path.string());
+
+    for (auto &obj : TopologicalSort(ntk)) {
+        if (obj->IsNode()) {
+            std::cout << obj->GetName() << ": " << obj->GetGateType() << " ";
+        }
+    }
 }

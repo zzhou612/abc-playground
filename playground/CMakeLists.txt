@@ -5,7 +5,7 @@ add_definitions(-DABC_NAMESPACE=abc)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
-find_package(Boost REQUIRED COMPONENTS regex system filesystem)
+find_package(Boost REQUIRED COMPONENTS regex system filesystem timer)
 
 include_directories(${ectl_include})
 include_directories(${ext_include})

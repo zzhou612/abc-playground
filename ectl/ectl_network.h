@@ -11,20 +11,38 @@ namespace ECTL {
     class Network;
 
     using ObjectID = int;
-
     using ObjectPtr = std::shared_ptr<Object>;
-
     using NetworkPtr = std::shared_ptr<Network>;
+
+    enum class GateType : int {
+        CONST0, CONST1, AND, INV
+    };
+
+    enum class AndType : int {
+        AND0, AND1, AND2, AND3 // 00 01 10 11
+    };
+
+    std::ostream &operator<<(std::ostream &os, GateType gt);
+
+    std::ostream &operator<<(std::ostream &os, AndType at);
 
     class Object {
     public:
         std::string GetName();
 
+        GateType GetGateType();
+
         int GetiTemp();
 
         void SetiTemp(int val);
 
-        void SopSimulate();
+        void _SopSimulate();
+
+        int GetVal();
+
+        void SetVal(int val);
+
+        void Simulate();
 
         bool IsPrimaryInput();
 
@@ -38,7 +56,7 @@ namespace ECTL {
 
         bool IsConst();
 
-        int GetID();
+        unsigned int GetID();
 
         NetworkPtr GetHostNetwork();
 
@@ -61,8 +79,15 @@ namespace ECTL {
         Object(abc::Abc_Obj_t *abc_node, NetworkPtr host_ntk);
 
     private:
+        unsigned int id_;
+        GateType gate_type_;
+        AndType and_type_;
+        bool is_on_set_;
+
+        int val_;
+
         abc::Abc_Obj_t *abc_obj_;
-        bool renewed;
+        bool renewed_;
         NetworkPtr host_ntk_;
         std::vector<ObjectPtr> fan_ins_;
         std::vector<ObjectPtr> fan_outs_;
@@ -130,5 +155,4 @@ namespace ECTL {
     };
 }
 
-
-#endif //DALS_ECTL_NETWORK_H
+#endif
