@@ -14,10 +14,16 @@ brew install gcc@8
 ```
 
 Install `boost` via `homebrew`. Make sure that `--cc=gcc-8` flag is added for the installation command. 
-Otherwise `clang` compiled version will be installed and strange mistakes will happen.
+Otherwise `clang` compiled version will be installed and mistakes will happen during linking.
 
 ```bash
 brew install boost --cc=gcc-8
+```
+
+To prevent `boost` from being updated/upgraded to `clang` compiled version, it needs to be pinned.
+
+```bash
+brew pin boost
 ```
 
 ### Ubuntu 18.04
