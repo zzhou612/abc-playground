@@ -112,9 +112,9 @@ namespace abc {
 }
 
 namespace ECTL {
-    std::vector<ObjectPtr> TopologicalSort(const NetworkPtr &ntk) {
+    std::vector<ObjPtr> TopologicalSort(const NtkPtr &ntk) {
         abc::Vec_Ptr_t *abc_objs = abc::Abc_NtkDfs(ntk->_Get_Abc_Ntk(), 0);
-        std::vector<ObjectPtr> sorted_objs;
+        std::vector<ObjPtr> sorted_objs;
 
         for (int i = 0; i < abc_objs->nSize; ++i) {
             int id = abc::Abc_ObjId((abc::Abc_Obj_t *) abc_objs->pArray[i]);
@@ -141,7 +141,7 @@ namespace ECTL {
 //        abc::Abc_ObjReplace(old_node, new_node);
 //    }
 
-    void PrintMFFC(const ObjectPtr &node) {
+    void PrintMFFC(const ObjPtr &node) {
         //Abc_NodeMffcConeSuppPrint
         using namespace abc;
         Vec_Ptr_t *vCone, *vSupp;
@@ -160,8 +160,8 @@ namespace ECTL {
         Vec_PtrFree(vSupp);
     }
 
-    std::vector<ObjectPtr> GetMFFCNodes(const ObjectPtr &node) {
-        std::vector<ObjectPtr> mffc;
+    std::vector<ObjPtr> GetMFFCNodes(const ObjPtr &node) {
+        std::vector<ObjPtr> mffc;
         abc::Vec_Ptr_t *vCone, *vSupp;
         abc::Abc_Obj_t *pObj;
         int i;
@@ -178,8 +178,8 @@ namespace ECTL {
         return mffc;
     }
 
-    std::vector<ObjectPtr> GetMFFCInputs(const ObjectPtr &node) {
-        std::vector<ObjectPtr> inputs;
+    std::vector<ObjPtr> GetMFFCInputs(const ObjPtr &node) {
+        std::vector<ObjPtr> inputs;
         abc::Vec_Ptr_t *vCone, *vSupp;
         abc::Abc_Obj_t *pObj;
         int i;
@@ -196,7 +196,7 @@ namespace ECTL {
         return inputs;
     }
 
-    NetworkPtr CreateMFFCNetwork(const ObjectPtr &node) {
+    NtkPtr CreateMFFCNetwork(const ObjPtr &node) {
         auto mffc_ntk = std::make_shared<Network>(abc::ECTL_Abc_NtkCreateMffc(abc::Abc_ObjNtk(node->_Get_Abc_Obj()),
                                                                               node->_Get_Abc_Obj(),
                                                                               abc::Abc_ObjName(node->_Get_Abc_Obj())));

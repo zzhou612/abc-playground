@@ -3,16 +3,17 @@
 #include "sta.h"
 #include "sasimi.h"
 
-void SASIMI::LoadNetwork(const NetworkPtr &ntk) {
+void SASIMI::LoadNetwork(const NtkPtr &ntk) {
     ntk_ = ntk;
     ntk_bak_ = ntk->Duplicate();
 }
 
 void SASIMI::InitFaninCones(bool print_result) {
-    for (const auto &node : ntk_->GetNodes()) {
-        fan_in_cones_.emplace(node->GetID(), FaninCone());
-        fan_in_cones_.at(node->GetID()).insert(node->GetID());
-    }
+    for (const auto &obj : ntk_->GetObjs())
+        if (obj && obj->IsNode()) {
+            fan_in_cones_.emplace(obj->GetID(), FaninCone());
+            fan_in_cones_.at(obj->GetID()).insert(obj->GetID());
+        }
 
     for (const auto &node : TopologicalSort(ntk_)) {
         for (const auto &fan_in : node->GetFanins()) {
@@ -34,11 +35,11 @@ void SASIMI::InitFaninCones(bool print_result) {
 
 }
 
-std::vector<Candidate> SASIMI::GetLegalCands(const ObjectPtr &target_node) {
+std::vector<Candidate> SASIMI::GetLegalCands(const ObjPtr &target_node) {
     return legal_cands_.at(target_node);
 }
 
-std::vector<Candidate> SASIMI::GetBestCands(const std::vector<ObjectPtr> &target_nodes, bool real_error, bool show_progress_bar) {
+std::vector<Candidate> SASIMI::GetBestCands(const std::vector<ObjPtr> &target_nodes, bool real_error, bool show_progress_bar) {
     GenerateLegalCands(target_nodes);
     std::vector<Candidate> best_cands;
     if (!real_error) GenerateTruthVector();
@@ -97,7 +98,7 @@ void SASIMI::GenerateTruthVector() {
     truth_vec_ = SimTruthVec(ntk_);
 }
 
-void SASIMI::GenerateLegalCands(const std::vector<ObjectPtr> &target_nodes) {
+void SASIMI::GenerateLegalCands(const std::vector<ObjPtr> &target_nodes) {
     legal_cands_.clear();
     for (const auto &t_node : target_nodes)
         legal_cands_.emplace(t_node, std::vector<Candidate>());
@@ -112,7 +113,7 @@ void SASIMI::GenerateLegalCands(const std::vector<ObjectPtr> &target_nodes) {
             }
 }
 
-double SASIMI::EstSubPairError(const ObjectPtr &target, const ObjectPtr &substitute) {
+double SASIMI::EstSubPairError(const ObjPtr &target, const ObjPtr &substitute) {
     assert(truth_vec_.at(target).size() == truth_vec_.at(substitute).size());
     auto vec_size = truth_vec_.at(target).size();
     double err = 0;
@@ -125,18 +126,18 @@ double SASIMI::EstSubPairError(const ObjectPtr &target, const ObjectPtr &substit
     return err;
 }
 
-void Candidate::GenTargetBak(NetworkPtr ntk_bak) {
+void Candidate::GenTargetBak(NtkPtr ntk_bak) {
     assert(target != nullptr);
     target_bak = ntk_bak->GetObjbyID(target->GetID());
 }
 
-void Candidate::SetTarget(ObjectPtr t) { target = std::move(t); }
+void Candidate::SetTarget(ObjPtr t) { target = std::move(t); }
 
-ObjectPtr Candidate::GetTarget() const { return target; }
+ObjPtr Candidate::GetTarget() const { return target; }
 
-void Candidate::SetSubstitute(ObjectPtr sub) { substitute = std::move(sub); }
+void Candidate::SetSubstitute(ObjPtr sub) { substitute = std::move(sub); }
 
-ObjectPtr Candidate::GetSubstitute() const { return substitute; }
+ObjPtr Candidate::GetSubstitute() const { return substitute; }
 
 void Candidate::SetError(double err) { error = err; }
 
@@ -178,6 +179,6 @@ Candidate &Candidate::operator=(const Candidate &other) {
 Candidate::Candidate() : error(100.0), can_be_complemented(false), is_complemented(false),
                          target(nullptr), substitute(nullptr), inv(nullptr), target_bak(nullptr) {}
 
-Candidate::Candidate(bool can_be_complemented, ObjectPtr t, ObjectPtr s) : can_be_complemented(can_be_complemented),
+Candidate::Candidate(bool can_be_complemented, ObjPtr t, ObjPtr s) : can_be_complemented(can_be_complemented),
                                                                            target(std::move(t)),
                                                                            substitute(std::move(s)) {}

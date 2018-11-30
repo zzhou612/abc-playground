@@ -242,28 +242,28 @@ namespace ECTL {
             val_ = ~val_;
     }
 
-    ObjectPtr Object::GetObjbyID(int id) { return host_ntk_->GetObjbyID(id); }
+    ObjPtr Object::GetObjbyID(int id) { return host_ntk_->GetObjbyID(id); }
 
-    ObjectPtr Object::GetFanin0() {
+    ObjPtr Object::GetFanin0() {
         assert(renewed_);
         return fan_ins_[0];
     }
 
-    ObjectPtr Object::GetFanin1() {
+    ObjPtr Object::GetFanin1() {
         assert(renewed_);
         return fan_ins_[1];
     }
 
     unsigned int Object::GetID() { return id_; }
 
-    NetworkPtr Object::GetHostNetwork() { return host_ntk_; }
+    NtkPtr Object::GetHostNetwork() { return host_ntk_; }
 
-    std::vector<ObjectPtr> Object::GetFanins() {
+    std::vector<ObjPtr> Object::GetFanins() {
         assert(renewed_);
         return fan_ins_;
     }
 
-    std::vector<ObjectPtr> Object::GetFanouts() {
+    std::vector<ObjPtr> Object::GetFanouts() {
         assert(renewed_);
         return fan_outs_;
     }
@@ -322,7 +322,7 @@ namespace ECTL {
         }
     }
 
-    Object::Object(abc::Abc_Obj_t *abc_node, NetworkPtr host_ntk) : Object(abc_node) {
+    Object::Object(abc::Abc_Obj_t *abc_node, NtkPtr host_ntk) : Object(abc_node) {
         host_ntk_ = std::move(host_ntk);
     }
 
@@ -336,13 +336,13 @@ namespace ECTL {
         abc::Io_WriteBlifLogic(abc::ECTL_Abc_NtkDup(abc_ntk_), (char *) ofile.c_str(), 0);
     }
 
-    NetworkPtr Network::Duplicate(bool renew) {
+    NtkPtr Network::Duplicate(bool renew) {
         auto dup_ntk = std::make_shared<Network>(abc::ECTL_Abc_NtkDup(abc_ntk_));
         if (renew) dup_ntk->Renew();
         return dup_ntk;
     }
 
-    NetworkPtr Network::DuplicateDFS(bool renew) {
+    NtkPtr Network::DuplicateDFS(bool renew) {
         auto dup_ntk = std::make_shared<Network>(abc::ECTL_Abc_NtkDupDfs(abc_ntk_));
         if (renew) dup_ntk->Renew();
         return dup_ntk;
@@ -379,47 +379,33 @@ namespace ECTL {
         abc_ntk_->pName = abc::Extra_UtilStrsav((char *) new_name.c_str());
     }
 
-    ObjectPtr Network::GetObjbyID(int id) { return objs_.at((unsigned) id); }
+    ObjPtr Network::GetObjbyID(int id) { return objs_.at((unsigned) id); }
 
-    std::vector<ObjectPtr> Network::GetObjs() {
+    std::vector<ObjPtr> Network::GetObjs() {
         return objs_;
     }
 
-    std::vector<ObjectPtr> Network::GetPrimaryInputs() {
+    std::vector<ObjPtr> Network::GetPrimaryInputs() {
         assert(renewed_);
         return pis_;
     }
 
-    std::vector<ObjectPtr> Network::GetPrimaryOutputs() {
+    std::vector<ObjPtr> Network::GetPrimaryOutputs() {
         assert(renewed_);
         return pos_;
     }
 
-    std::vector<ObjectPtr> Network::GetNodes() {
-        assert(renewed_);
-        return nodes_;
-    }
-
-    std::vector<ObjectPtr> Network::GetPIsNodes() {
-        assert(renewed_);
-        std::vector<ObjectPtr> pis_nodes;
-        pis_nodes.reserve(pis_.size() + nodes_.size());
-        pis_nodes.insert(pis_nodes.end(), pis_.begin(), pis_.end());
-        pis_nodes.insert(pis_nodes.end(), nodes_.begin(), nodes_.end());
-        return pis_nodes;
-    }
-
-    ObjectPtr Network::GetPrimaryInputbyName(std::string name) {
+    ObjPtr Network::GetPrimaryInputbyName(std::string name) {
         assert(renewed_);
         return GetObjbyID(abc::Abc_ObjId(abc::Abc_NtkFindCi(abc_ntk_, (char *) name.c_str())));
     }
 
-    ObjectPtr Network::GetNodebyName(std::string name) {
+    ObjPtr Network::GetNodebyName(std::string name) {
         assert(renewed_);
         return GetObjbyID(abc::Abc_ObjId(abc::Abc_NtkFindNode(abc_ntk_, (char *) name.c_str())));
     }
 
-    void Network::ReplaceObj(ObjectPtr obj_old, ObjectPtr obj_new) {
+    void Network::ReplaceObj(ObjPtr obj_old, ObjPtr obj_new) {
         abc::Abc_ObjTransferFanout(obj_old->_Get_Abc_Obj(), obj_new->_Get_Abc_Obj());
         renewed_ = false;
         obj_new->Renew();
@@ -429,13 +415,11 @@ namespace ECTL {
         renewed_ = true;
     }
 
-    void Network::RecoverObjFrom(ObjectPtr obj_bak) {
+    void Network::RecoverObjFrom(ObjPtr obj_bak) {
         renewed_ = false;
-
         for (const auto &fan_out_bak : obj_bak->GetFanouts()) {
             auto abc_fan_out = GetObjbyID(fan_out_bak->GetID())->_Get_Abc_Obj();
             abc::Abc_ObjRemoveFanins(abc_fan_out);
-
             for (const auto &fan_in_bak : fan_out_bak->GetFanins()) {
                 auto abc_fan_in = GetObjbyID(fan_in_bak->GetID())->_Get_Abc_Obj();
                 abc::Abc_ObjAddFanin(abc_fan_out, abc_fan_in);
@@ -443,22 +427,21 @@ namespace ECTL {
             GetObjbyID(fan_out_bak->GetID())->Renew();
         }
         GetObjbyID(obj_bak->GetID())->Renew();
-
         renewed_ = true;
     }
 
-    void Network::DeleteObj(ObjectPtr obj) {
+    void Network::DeleteObj(ObjPtr obj) {
         abc::Abc_NtkDeleteObj(obj->_Get_Abc_Obj());
         renewed_ = false;
         for (const auto &fan_in : obj->GetFanouts())
             fan_in->Renew();
         for (const auto &fan_out : obj->GetFanouts())
             fan_out->Renew();
-        obj.reset();
+        objs_[obj->GetID()].reset();
         renewed_ = true;
     }
 
-    ObjectPtr Network::CreateInverter(ObjectPtr fan_in) {
+    ObjPtr Network::CreateInverter(ObjPtr fan_in) {
         auto abc_inv = abc::Abc_NtkCreateNodeInv(abc_ntk_, fan_in->_Get_Abc_Obj());
         renewed_ = false;
         _AddAbcObject(abc_inv);
@@ -472,10 +455,9 @@ namespace ECTL {
         abc::Abc_Obj_t *abc_obj;
         int i;
         objs_.clear();
-        nodes_.clear();
         pis_.clear();
         pos_.clear();
-        for (int t = 0; t <= abc::Abc_NtkObjNumMax(abc_ntk_); t++) objs_.push_back(nullptr);
+        objs_.resize((unsigned long) abc::Abc_NtkObjNumMax(abc_ntk_) + 1, nullptr);
         Abc_NtkForEachObj(abc_ntk_, abc_obj, i) {
                 _AddAbcObject(abc_obj, false);
             }
@@ -486,13 +468,11 @@ namespace ECTL {
         renewed_ = true;
     }
 
-    ObjectPtr Network::_AddAbcObject(abc::Abc_Obj_t *abc_obj, bool renew) {
+    ObjPtr Network::_AddAbcObject(abc::Abc_Obj_t *abc_obj, bool renew) {
         auto obj = std::make_shared<Object>(abc_obj, shared_from_this());
         if (abc::Abc_ObjId(abc_obj) > objs_.size() - 1)
-            objs_.resize(objs_.size() * 2, nullptr);
+            objs_.resize(objs_.size() + 100, nullptr);
         objs_.at(abc::Abc_ObjId(abc_obj)) = obj;
-        if (abc::Abc_ObjIsNode(abc_obj))
-            nodes_.push_back(obj);
         if (abc::Abc_ObjIsPi(abc_obj))
             pis_.push_back(obj);
         if (abc::Abc_ObjIsPo(abc_obj))

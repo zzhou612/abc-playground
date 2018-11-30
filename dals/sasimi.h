@@ -10,15 +10,15 @@ using namespace ECTL;
 
 class Candidate {
 public:
-    void GenTargetBak(NetworkPtr ntk_bak);
+    void GenTargetBak(NtkPtr ntk_bak);
 
-    void SetTarget(ObjectPtr t);
+    void SetTarget(ObjPtr t);
 
-    ObjectPtr GetTarget() const;
+    ObjPtr GetTarget() const;
 
-    void SetSubstitute(ObjectPtr sub);
+    void SetSubstitute(ObjPtr sub);
 
-    ObjectPtr GetSubstitute() const;
+    ObjPtr GetSubstitute() const;
 
     void SetError(double err);
 
@@ -38,42 +38,42 @@ public:
 
     Candidate();
 
-    Candidate(bool can_be_complemented, ObjectPtr t, ObjectPtr s);
+    Candidate(bool can_be_complemented, ObjPtr t, ObjPtr s);
 
 private:
     double error;
     bool can_be_complemented;
     bool is_complemented;
-    ObjectPtr target, substitute;
-    ObjectPtr inv;
-    ObjectPtr target_bak;
+    ObjPtr target, substitute;
+    ObjPtr inv;
+    ObjPtr target_bak;
 };
 
 class SASIMI {
 public:
-    void LoadNetwork(const NetworkPtr &ntk);
+    void LoadNetwork(const NtkPtr &ntk);
 
     void GenerateTruthVector();
 
     std::vector<Candidate>
-    GetBestCands(const std::vector<ObjectPtr> &target_nodes, bool real_error = false, bool show_progress_bar = false);
+    GetBestCands(const std::vector<ObjPtr> &target_nodes, bool real_error = false, bool show_progress_bar = false);
 
-    double EstSubPairError(const ObjectPtr &target, const ObjectPtr &substitute);
+    double EstSubPairError(const ObjPtr &target, const ObjPtr &substitute);
 
 private:
     void InitFaninCones(bool print_result = false);
 
-    void GenerateLegalCands(const std::vector<ObjectPtr> &target_nodes);
+    void GenerateLegalCands(const std::vector<ObjPtr> &target_nodes);
 
-    std::vector<Candidate> GetLegalCands(const ObjectPtr &target_node);
+    std::vector<Candidate> GetLegalCands(const ObjPtr &target_node);
 
-    using FaninCone = std::unordered_set<ObjectID>;
+    using FaninCone = std::unordered_set<ObjID>;
 
-    NetworkPtr ntk_;
-    NetworkPtr ntk_bak_;
-    std::unordered_map<ObjectID, FaninCone> fan_in_cones_;
-    std::unordered_map<ObjectPtr, std::vector<Candidate>> legal_cands_;
-    std::unordered_map<ObjectPtr, std::vector<int>> truth_vec_;
+    NtkPtr ntk_;
+    NtkPtr ntk_bak_;
+    std::unordered_map<ObjID, FaninCone> fan_in_cones_;
+    std::unordered_map<ObjPtr, std::vector<Candidate>> legal_cands_;
+    std::unordered_map<ObjPtr, std::vector<int>> truth_vec_;
 
 };
 

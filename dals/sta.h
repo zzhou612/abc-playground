@@ -17,9 +17,9 @@ struct TimeObject {
 };
 
 struct Path {
-    std::vector<ObjectPtr> nodes;
+    std::vector<ObjPtr> nodes;
 
-    explicit Path(std::vector<ObjectPtr> nodes = std::vector<ObjectPtr>()) {
+    explicit Path(std::vector<ObjPtr> nodes = std::vector<ObjPtr>()) {
         this->nodes = std::move(nodes);
     }
 
@@ -30,13 +30,13 @@ struct Path {
     }
 };
 
-std::unordered_map<ObjectPtr, TimeObject> CalculateSlack(const NetworkPtr &ntk, bool print_result = false);
+std::unordered_map<ObjPtr, TimeObject> CalculateSlack(const NtkPtr &ntk, bool print_result = false);
 
-int PrintKMostCriticalPaths(const NetworkPtr &ntk, int k = 10, bool show_slack = false);
+int PrintKMostCriticalPaths(const NtkPtr &ntk, int k = 10, bool show_slack = false);
 
-std::vector<Path> GetKMostCriticalPaths(const NetworkPtr &ntk, int k = -1);
+std::vector<Path> GetKMostCriticalPaths(const NtkPtr &ntk, int k = -1);
 
-std::vector<ObjectPtr> MinCut(const NetworkPtr &ntk, const std::unordered_map<ObjectPtr, double> &node_error);
+std::vector<ObjPtr> MinCut(const NtkPtr &ntk, const std::unordered_map<ObjPtr, double> &node_error);
 
 
 #endif

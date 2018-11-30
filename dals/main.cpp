@@ -16,7 +16,7 @@ using namespace ECTL;
 int main() {
     path project_source_dir(PROJECT_SOURCE_DIR);
     path benchmark_dir = project_source_dir / "benchmark";
-    path benchmark_path = benchmark_dir / "C499.blif";
+    path benchmark_path = benchmark_dir / "C880.blif";
     path test_path = benchmark_dir / "out.blif";
 
     boost::timer::cpu_timer timer;
@@ -25,12 +25,11 @@ int main() {
     ntk_origin->ReadBlifLogic(benchmark_path.string());
     auto ntk_approx = ntk_origin->Duplicate();
 
-
     double error_rate = 0;
 
     while (error_rate < 0.15) {
         auto time_objs = CalculateSlack(ntk_approx);
-        std::vector<ObjectPtr> critical_nodes;
+        std::vector<ObjPtr> critical_nodes;
         for (const auto &node : TopologicalSort(ntk_approx))
             if (time_objs.at(node).slack == 0 && node->IsNode())
                 critical_nodes.push_back(node);
@@ -38,7 +37,7 @@ int main() {
         sasimi.LoadNetwork(ntk_approx);
 //        sasimi.GenerateTruthVector();
         auto cands = sasimi.GetBestCands(critical_nodes, true, true);
-        std::unordered_map<ObjectPtr, double> node_error;
+        std::unordered_map<ObjPtr, double> node_error;
         for (const auto &cand : cands)
             node_error.emplace(cand.GetTarget(), cand.GetError());
         auto min_cut = MinCut(ntk_approx, node_error);
@@ -58,7 +57,7 @@ int main() {
         std::cout << std::endl << std::endl << std::endl;
     }
 
-    std::cout << std::endl << timer.format() << std::endl;
+    std::cout << timer.format() << std::endl;
 
     return 0;
 }

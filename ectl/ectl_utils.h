@@ -7,19 +7,19 @@
 #include <ectl_network.h>
 
 namespace ECTL {
-    std::vector<ObjectPtr> TopologicalSort(const NetworkPtr &ntk);
+    std::vector<ObjPtr> TopologicalSort(const NtkPtr &ntk);
 
 //    Node_t CreateConstNode(Network_t ntk, int constant);
 //
 //    void ReplaceNode(Node_t old_node, Node_t new_node);
 
-    void PrintMFFC(ObjectPtr node);
+    void PrintMFFC(ObjPtr node);
 
-    std::vector<ObjectPtr> GetMFFCNodes(const ObjectPtr &node);
+    std::vector<ObjPtr> GetMFFCNodes(const ObjPtr &node);
 
-    std::vector<ObjectPtr> GetMFFCInputs(const ObjectPtr &node);
+    std::vector<ObjPtr> GetMFFCInputs(const ObjPtr &node);
 
-    NetworkPtr CreateMFFCNetwork(const ObjectPtr &node);
+    NtkPtr CreateMFFCNetwork(const ObjPtr &node);
 }
 
 #endif

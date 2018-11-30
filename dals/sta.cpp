@@ -6,18 +6,18 @@
 static const int INF = 1000000;
 
 struct T_Node {
-    ObjectPtr node;
+    ObjPtr node;
     int max_delay_to_sink;
 
-    T_Node(ObjectPtr node, int max_delay_to_sink) : node(std::move(node)), max_delay_to_sink(max_delay_to_sink) {}
+    T_Node(ObjPtr node, int max_delay_to_sink) : node(std::move(node)), max_delay_to_sink(max_delay_to_sink) {}
 };
 
 struct PartialPath {
-    std::vector<ObjectPtr> path;
+    std::vector<ObjPtr> path;
     int max_delay;
 
-    PartialPath(ObjectPtr node, int max_delay,
-                std::vector<ObjectPtr> path = std::vector<ObjectPtr>()) : path(std::move(path)), max_delay(max_delay) {
+    PartialPath(ObjPtr node, int max_delay,
+                std::vector<ObjPtr> path = std::vector<ObjPtr>()) : path(std::move(path)), max_delay(max_delay) {
         this->path.emplace_back(node);
     }
 };
@@ -110,7 +110,8 @@ struct Dinic {
     }
 
     std::vector<Edge> MinCut(int S, int T) {
-        double max_flow = MaxFlow(S, T);
+//        double max_flow = MaxFlow(S, T);
+        MaxFlow(S, T);
         std::vector<Edge> min_cut;
         DFS_ResidualNetwork(S);
         for (auto e:E)
@@ -120,10 +121,10 @@ struct Dinic {
     }
 };
 
-std::unordered_map<ObjectPtr, TimeObject> CalculateSlack(const NetworkPtr &ntk, bool print_result) {
-    std::vector<ObjectPtr> sorted_nodes = TopologicalSort(ntk);
+std::unordered_map<ObjPtr, TimeObject> CalculateSlack(const NtkPtr &ntk, bool print_result) {
+    std::vector<ObjPtr> sorted_nodes = TopologicalSort(ntk);
 
-    std::unordered_map<ObjectPtr, TimeObject> t_objs;
+    std::unordered_map<ObjPtr, TimeObject> t_objs;
 
     /* Initialization */
     for (auto node : sorted_nodes)
@@ -168,11 +169,11 @@ std::unordered_map<ObjectPtr, TimeObject> CalculateSlack(const NetworkPtr &ntk, 
     return t_objs;
 }
 
-int PrintKMostCriticalPaths(const NetworkPtr &ntk, int k, bool show_slack) {
+int PrintKMostCriticalPaths(const NtkPtr &ntk, int k, bool show_slack) {
     int delay = -1;
-    std::unordered_map<ObjectPtr, TimeObject> time_man = CalculateSlack(ntk);
-    std::vector<ObjectPtr> sorted_nodes = TopologicalSort(ntk);
-    std::unordered_map<ObjectPtr, int> max_delay_to_sink;
+    std::unordered_map<ObjPtr, TimeObject> time_man = CalculateSlack(ntk);
+    std::vector<ObjPtr> sorted_nodes = TopologicalSort(ntk);
+    std::unordered_map<ObjPtr, int> max_delay_to_sink;
 
     /* Computation of Maximum Delays to Sink */
     for (const auto &node : sorted_nodes) {
@@ -212,7 +213,7 @@ int PrintKMostCriticalPaths(const NetworkPtr &ntk, int k, bool show_slack) {
             }
             std::cout << std::endl;
         } else {
-            ObjectPtr node_t = t_path.path.back();
+            ObjPtr node_t = t_path.path.back();
             for (const auto &successor : node_t->GetFanouts()) {
                 if (!successor->IsPrimaryOutput() && max_delay_to_sink.find(successor) != max_delay_to_sink.end())
                     paths.emplace(successor,
@@ -228,11 +229,11 @@ int PrintKMostCriticalPaths(const NetworkPtr &ntk, int k, bool show_slack) {
     return delay;
 }
 
-std::vector<Path> GetKMostCriticalPaths(const NetworkPtr &ntk, int k) {
+std::vector<Path> GetKMostCriticalPaths(const NtkPtr &ntk, int k) {
     int critical_path_delay = -1;
-    std::unordered_map<ObjectPtr, TimeObject> time_man = CalculateSlack(ntk);
-    std::vector<ObjectPtr> sorted_nodes = TopologicalSort(ntk);
-    std::unordered_map<ObjectPtr, int> max_delay_to_sink;
+    std::unordered_map<ObjPtr, TimeObject> time_man = CalculateSlack(ntk);
+    std::vector<ObjPtr> sorted_nodes = TopologicalSort(ntk);
+    std::unordered_map<ObjPtr, int> max_delay_to_sink;
     std::vector<Path> critical_paths;
 
 
@@ -272,7 +273,7 @@ std::vector<Path> GetKMostCriticalPaths(const NetworkPtr &ntk, int k) {
             } else
                 break;
         } else {
-            ObjectPtr node_t = t_path.path.back();
+            ObjPtr node_t = t_path.path.back();
             for (const auto &successor : node_t->GetFanouts()) {
                 if (!successor->IsPrimaryOutput() && max_delay_to_sink.find(successor) != max_delay_to_sink.end())
                     paths.emplace(successor,
@@ -288,9 +289,9 @@ std::vector<Path> GetKMostCriticalPaths(const NetworkPtr &ntk, int k) {
     return critical_paths;
 }
 
-std::vector<ObjectPtr> MinCut(const NetworkPtr &ntk, const std::unordered_map<ObjectPtr, double> &node_error) {
+std::vector<ObjPtr> MinCut(const NtkPtr &ntk, const std::unordered_map<ObjPtr, double> &node_error) {
     auto time_objs = CalculateSlack(ntk);
-    auto N = (int) abc::Abc_NtkObjNum(ntk->_Get_Abc_Ntk()) + 2;
+    auto N = abc::Abc_NtkObjNum(ntk->_Get_Abc_Ntk()) + 2;
     Dinic dinic(N * 2);
     bool is_connected[N][N];
     int source = 0, sink = N - 1;
@@ -330,7 +331,7 @@ std::vector<ObjectPtr> MinCut(const NetworkPtr &ntk, const std::unordered_map<Ob
 
     std::cout << "Max Flow: " << dinic.MaxFlow(source, sink) << std::endl;
     std::vector<Edge> min_cut = dinic.MinCut(source, sink);
-    std::vector<ObjectPtr> min_cut_nodes;
+    std::vector<ObjPtr> min_cut_nodes;
     for (auto e:min_cut)
         min_cut_nodes.push_back(ntk->GetObjbyID(e.u));
     return min_cut_nodes;

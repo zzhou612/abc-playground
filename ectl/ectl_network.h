@@ -11,9 +11,9 @@ namespace ECTL {
 
     class Network;
 
-    using ObjectID = int;
-    using ObjectPtr = std::shared_ptr<Object>;
-    using NetworkPtr = std::shared_ptr<Network>;
+    using ObjID = int;
+    using ObjPtr = std::shared_ptr<Object>;
+    using NtkPtr = std::shared_ptr<Network>;
 
     enum class GateType : int {
         CONST0, CONST1, WIRE, AND, INV
@@ -59,17 +59,17 @@ namespace ECTL {
 
         unsigned int GetID();
 
-        NetworkPtr GetHostNetwork();
+        NtkPtr GetHostNetwork();
 
-        ObjectPtr GetObjbyID(int id);
+        ObjPtr GetObjbyID(int id);
 
-        ObjectPtr GetFanin0();
+        ObjPtr GetFanin0();
 
-        ObjectPtr GetFanin1();
+        ObjPtr GetFanin1();
 
-        std::vector<ObjectPtr> GetFanins();
+        std::vector<ObjPtr> GetFanins();
 
-        std::vector<ObjectPtr> GetFanouts();
+        std::vector<ObjPtr> GetFanouts();
 
         abc::Abc_Obj_t *_Get_Abc_Obj();
 
@@ -77,21 +77,20 @@ namespace ECTL {
 
         explicit Object(abc::Abc_Obj_t *abc_node);
 
-        Object(abc::Abc_Obj_t *abc_node, NetworkPtr host_ntk);
+        Object(abc::Abc_Obj_t *abc_node, NtkPtr host_ntk);
 
     private:
         unsigned int id_;
         GateType gate_type_;
         AndType and_type_;
         bool is_complement;
-
         uint64_t val_;
 
         abc::Abc_Obj_t *abc_obj_;
         bool renewed_;
-        NetworkPtr host_ntk_;
-        std::vector<ObjectPtr> fan_ins_;
-        std::vector<ObjectPtr> fan_outs_;
+        NtkPtr host_ntk_;
+        std::vector<ObjPtr> fan_ins_;
+        std::vector<ObjPtr> fan_outs_;
     };
 
     class Network : public std::enable_shared_from_this<Network> {
@@ -104,35 +103,31 @@ namespace ECTL {
 
         void SetName(const std::string &new_name);
 
-        NetworkPtr Duplicate(bool renew = true);
+        NtkPtr Duplicate(bool renew = true);
 
-        NetworkPtr DuplicateDFS(bool renew = true);
+        NtkPtr DuplicateDFS(bool renew = true);
 
         std::string GetName();
 
-        std::vector<ObjectPtr> GetObjs();
+        std::vector<ObjPtr> GetObjs();
 
-        std::vector<ObjectPtr> GetPrimaryInputs();
+        std::vector<ObjPtr> GetPrimaryInputs();
 
-        std::vector<ObjectPtr> GetPrimaryOutputs();
+        std::vector<ObjPtr> GetPrimaryOutputs();
 
-        std::vector<ObjectPtr> GetNodes();
+        ObjPtr GetObjbyID(int id);
 
-        std::vector<ObjectPtr> GetPIsNodes();
+        ObjPtr GetPrimaryInputbyName(std::string name);
 
-        ObjectPtr GetObjbyID(int id);
+        ObjPtr GetNodebyName(std::string name);
 
-        ObjectPtr GetPrimaryInputbyName(std::string name);
+        void ReplaceObj(ObjPtr obj_old, ObjPtr obj_new);
 
-        ObjectPtr GetNodebyName(std::string name);
+        void RecoverObjFrom(ObjPtr obj_bak);
 
-        void ReplaceObj(ObjectPtr obj_old, ObjectPtr obj_new);
+        void DeleteObj(ObjPtr obj);
 
-        void RecoverObjFrom(ObjectPtr obj_bak);
-
-        void DeleteObj(ObjectPtr obj);
-
-        ObjectPtr CreateInverter(ObjectPtr fan_in);
+        ObjPtr CreateInverter(ObjPtr fan_in);
 
         abc::Abc_Ntk_t *_Get_Abc_Ntk();
 
@@ -145,14 +140,13 @@ namespace ECTL {
         ~Network();
 
     private:
-        ObjectPtr _AddAbcObject(abc::Abc_Obj_t *abc_obj, bool renew = true);
+        ObjPtr _AddAbcObject(abc::Abc_Obj_t *abc_obj, bool renew = true);
 
         abc::Abc_Ntk_t *abc_ntk_;
         bool renewed_;
-        std::vector<ObjectPtr> objs_;
-        std::vector<ObjectPtr> nodes_;
-        std::vector<ObjectPtr> pis_;
-        std::vector<ObjectPtr> pos_;
+        std::vector<ObjPtr> objs_;
+        std::vector<ObjPtr> pis_;
+        std::vector<ObjPtr> pos_;
     };
 }
 

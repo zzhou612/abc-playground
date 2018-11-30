@@ -7,7 +7,7 @@
 
 namespace ECTL {
 
-    double _SimER(const NetworkPtr &origin_ntk, const NetworkPtr &approx_ntk, bool show_progress_bar, int sim_time) {
+    double _SimER(const NtkPtr &origin_ntk, const NtkPtr &approx_ntk, bool show_progress_bar, int sim_time) {
         std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> distribution(0, 1);
         auto dice = std::bind(distribution, generator);
@@ -58,7 +58,7 @@ namespace ECTL {
 
     }
 
-    double SimER(const NetworkPtr &origin_ntk, const NetworkPtr &approx_ntk, bool show_progress_bar, int sim_time) {
+    double SimER(const NtkPtr &origin_ntk, const NtkPtr &approx_ntk, bool show_progress_bar, int sim_time) {
         std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<uint64_t> distribution(0, UINT64_MAX);
         auto dice = std::bind(distribution, generator);
@@ -107,15 +107,14 @@ namespace ECTL {
         return (double) err / (double) sim_time;
     }
 
-    std::unordered_map<ObjectPtr, std::vector<int>> SimTruthVec(const NetworkPtr &ntk, bool show_progress_bar, int sim_time) {
-        std::unordered_map<ObjectPtr, std::vector<int>> truth_vec;
-
-        truth_vec.reserve(ntk->GetPIsNodes().size());
-
-        for (const auto &obj : ntk->GetPIsNodes()) {
-            truth_vec.emplace(obj, std::vector<int>());
-            truth_vec.at(obj).reserve(sim_time);
-        }
+    std::unordered_map<ObjPtr, std::vector<int>> SimTruthVec(const NtkPtr &ntk, bool show_progress_bar, int sim_time) {
+        std::unordered_map<ObjPtr, std::vector<int>> truth_vec;
+//        truth_vec.reserve(ntk->GetPIsNodes().size());
+        for (const auto &obj : ntk->GetObjs())
+            if (obj && (obj->IsPrimaryInput() || obj->IsNode())) {
+                truth_vec.emplace(obj, std::vector<int>());
+                truth_vec.at(obj).reserve(sim_time);
+            }
 
         std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> distribution(0, 1);
@@ -142,32 +141,5 @@ namespace ECTL {
             }
         }
         return truth_vec;
-    }
-
-    void SimTest(NetworkPtr ntk) {
-        std::default_random_engine generator((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
-        std::uniform_int_distribution<int> distribution(0, 1);
-        auto dice = std::bind(distribution, generator);
-
-        assert(abc::Abc_NtkIsSopLogic(ntk->_Get_Abc_Ntk()));
-        for (auto &pi : ntk->GetPrimaryInputs())
-            pi->SetiTemp(dice());
-        for (auto &obj : TopologicalSort(ntk))
-            if (obj->IsNode())
-                obj->_SopSimulate();
-        for (auto &po : ntk->GetPrimaryOutputs())
-            po->SetiTemp(po->GetFanin0()->GetiTemp());
-
-        std::cout << "Performing simulation test (one round) for " << ntk->GetName() << ":\n";
-        std::cout << "Primary inputs:\n";
-        for (auto &pi : ntk->GetPrimaryInputs())
-            std::cout << pi->GetName() << "=" << pi->GetiTemp() << " ";
-        std::cout << "\nInternal nodes (including primary output nodes):\n";
-        for (auto &node: ntk->GetNodes())
-            std::cout << node->GetName() << "=" << node->GetiTemp() << " ";
-        std::cout << "\nPrimary outputs:\n";
-        for (auto &po : ntk->GetPrimaryOutputs())
-            std::cout << po->GetName() << "=" << po->GetiTemp() << " ";
-        std::cout << std::endl;
     }
 }
