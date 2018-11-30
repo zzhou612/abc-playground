@@ -67,7 +67,6 @@ private:
 
     std::vector<Candidate> GetLegalCands(const ObjectPtr &target_node);
 
-
     using FaninCone = std::unordered_set<ObjectID>;
 
     NetworkPtr ntk_;

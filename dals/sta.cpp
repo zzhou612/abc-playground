@@ -297,7 +297,6 @@ std::vector<ObjectPtr> MinCut(const NetworkPtr &ntk, const std::unordered_map<Ob
 
     memset(is_connected, 0, sizeof(is_connected[0][0]) * N * N);
 
-//    for (const auto &node : ntk->GetPIsNodes())
     for (const auto &node : TopologicalSort(ntk))
         if (time_objs.at(node).slack == 0) {
             int u = node->GetID();

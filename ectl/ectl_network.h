@@ -2,6 +2,7 @@
 #define ECTL_NETWORK_H
 
 #include <abc_api.h>
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -15,7 +16,7 @@ namespace ECTL {
     using NetworkPtr = std::shared_ptr<Network>;
 
     enum class GateType : int {
-        CONST0, CONST1, AND, INV
+        CONST0, CONST1, WIRE, AND, INV
     };
 
     enum class AndType : int {
@@ -38,9 +39,9 @@ namespace ECTL {
 
         void _SopSimulate();
 
-        int GetVal();
+        uint64_t GetVal();
 
-        void SetVal(int val);
+        void SetVal(uint64_t val);
 
         void Simulate();
 
@@ -82,9 +83,9 @@ namespace ECTL {
         unsigned int id_;
         GateType gate_type_;
         AndType and_type_;
-        bool is_on_set_;
+        bool is_complement;
 
-        int val_;
+        uint64_t val_;
 
         abc::Abc_Obj_t *abc_obj_;
         bool renewed_;
@@ -147,7 +148,7 @@ namespace ECTL {
         ObjectPtr _AddAbcObject(abc::Abc_Obj_t *abc_obj, bool renew = true);
 
         abc::Abc_Ntk_t *abc_ntk_;
-        bool renewed;
+        bool renewed_;
         std::vector<ObjectPtr> objs_;
         std::vector<ObjectPtr> nodes_;
         std::vector<ObjectPtr> pis_;

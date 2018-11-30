@@ -11,23 +11,23 @@ namespace abc {
         if (fCopyName) {
             if (Abc_ObjIsCi(pObj)) {
                 if (!Abc_NtkIsNetlist(pNtkNew))
-                    Abc_ObjAssignName(pObjNew, Abc_ObjName(Abc_ObjFanout0Ntk(pObj)), NULL);
+                    Abc_ObjAssignName(pObjNew, Abc_ObjName(Abc_ObjFanout0Ntk(pObj)), nullptr);
             } else if (Abc_ObjIsCo(pObj)) {
                 if (!Abc_NtkIsNetlist(pNtkNew)) {
                     if (Abc_ObjIsPo(pObj))
-                        Abc_ObjAssignName(pObjNew, Abc_ObjName(Abc_ObjFanin0Ntk(pObj)), NULL);
+                        Abc_ObjAssignName(pObjNew, Abc_ObjName(Abc_ObjFanin0Ntk(pObj)), nullptr);
                     else {
                         assert(Abc_ObjIsLatch(Abc_ObjFanout0(pObj)));
-                        Abc_ObjAssignName(pObjNew, Abc_ObjName(pObj), NULL);
+                        Abc_ObjAssignName(pObjNew, Abc_ObjName(pObj), nullptr);
                     }
                 }
             } else if (Abc_ObjIsBox(pObj) || Abc_ObjIsNet(pObj))
-                Abc_ObjAssignName(pObjNew, Abc_ObjName(pObj), NULL);
+                Abc_ObjAssignName(pObjNew, Abc_ObjName(pObj), nullptr);
         }
         // copy functionality/names
         if (Abc_ObjIsNode(pObj)) // copy the function if functionality is compatible
         {
-            Abc_ObjAssignName(pObjNew, Abc_ObjName(pObj), NULL);  //MODIFIED: copy node's name as expected
+            Abc_ObjAssignName(pObjNew, Abc_ObjName(pObj), nullptr);  //MODIFIED: copy node's name as expected
             if (pNtkNew->ntkFunc == pObj->pNtk->ntkFunc) {
                 if (Abc_NtkIsStrash(pNtkNew)) {}
                 else if (Abc_NtkHasSop(pNtkNew) || Abc_NtkHasBlifMv(pNtkNew))
@@ -59,8 +59,8 @@ namespace abc {
         Abc_Ntk_t *pNtkNew;
         Abc_Obj_t *pObj, *pFanin;
         int i, k;
-        if (pNtk == NULL)
-            return NULL;
+        if (pNtk == nullptr)
+            return nullptr;
         // start the network
         pNtkNew = Abc_NtkStartFrom(pNtk, pNtk->ntkType, pNtk->ntkFunc);
         // copy the internal nodes
@@ -79,7 +79,7 @@ namespace abc {
                        Abc_NtkNodeNum(pNtk) - Abc_NtkNodeNum(pNtkNew));
         } else {
             // duplicate the nets and nodes (CIs/COs/latches already dupped)
-            Abc_NtkForEachObj(pNtk, pObj, i) if (pObj->pCopy == NULL)
+            Abc_NtkForEachObj(pNtk, pObj, i) if (pObj->pCopy == nullptr)
                     ECTL_Abc_NtkDupObj(pNtkNew, pObj, Abc_NtkHasBlackbox(pNtk) && Abc_ObjIsNet(pObj));
             // reconnect all objects (no need to transfer attributes on edges)
             Abc_NtkForEachObj(pNtk, pObj, i) if (!Abc_ObjIsBox(pObj) && !Abc_ObjIsBo(pObj))
@@ -109,8 +109,8 @@ namespace abc {
         Abc_Ntk_t *pNtkNew;
         Abc_Obj_t *pObj, *pFanin;
         int i, k;
-        if (pNtk == NULL)
-            return NULL;
+        if (pNtk == nullptr)
+            return nullptr;
         assert(!Abc_NtkIsStrash(pNtk) && !Abc_NtkIsNetlist(pNtk));
         // start the network
         pNtkNew = Abc_NtkStartFrom(pNtk, pNtk->ntkType, pNtk->ntkFunc);
@@ -152,6 +152,9 @@ namespace ECTL {
                 break;
             case GateType::CONST1:
                 os << "CONST1";
+                break;
+            case GateType::WIRE:
+                os << "WIRE";
                 break;
             case GateType::AND:
                 os << "AND";
@@ -197,38 +200,46 @@ namespace ECTL {
 
     void Object::_SopSimulate() { SetiTemp(abc::Abc_ObjSopSimulate(abc_obj_)); }
 
-    int Object::GetVal() { return val_; }
+    uint64_t Object::GetVal() { return val_; }
 
-    void Object::SetVal(int val) { val_ = val; }
+    void Object::SetVal(uint64_t val) { val_ = val; }
 
     void Object::Simulate() {
         switch (gate_type_) {
             case GateType::CONST0:
-                SetVal(0);
+                val_ = 0;
                 break;
             case GateType::CONST1:
-                SetVal(1);
+                val_ = 1;
+                break;
+            case GateType::WIRE:
+                val_ = GetFanin0()->GetVal();
                 break;
             case GateType::AND: {
-                int input0 = GetFanin0()->GetVal();
-                int input1 = GetFanin1()->GetVal();
+                uint64_t input0 = GetFanin0()->GetVal();
+                uint64_t input1 = GetFanin1()->GetVal();
                 switch (and_type_) {
-                    case AndType::AND0:
+                    case AndType::AND0: // 00
+                        val_ = ~input0 & ~input1;
                         break;
-                    case AndType::AND1:
+                    case AndType::AND1: // 01
+                        val_ = ~input0 & input1;
                         break;
-                    case AndType::AND2:
+                    case AndType::AND2: // 10
+                        val_ = input0 & ~input1;
                         break;
-                    case AndType::AND3:
+                    case AndType::AND3: // 11
+                        val_ = input0 & input1;
                         break;
                 }
                 break;
             }
             case GateType::INV:
-                SetVal(~GetFanin0()->GetVal());
+                val_ = ~GetFanin0()->GetVal();
                 break;
         }
-
+        if (is_complement)
+            val_ = ~val_;
     }
 
     ObjectPtr Object::GetObjbyID(int id) { return host_ntk_->GetObjbyID(id); }
@@ -295,12 +306,14 @@ namespace ECTL {
     Object::Object(abc::Abc_Obj_t *abc_node) : id_(abc::Abc_ObjId(abc_node)), abc_obj_(abc_node), renewed_(false) {
         if (IsNode()) {
             char *pSop = (char *) abc_node->pData;
-            is_on_set_ = (bool) abc::Abc_SopIsComplement(pSop);
+            is_complement = (bool) abc::Abc_SopIsComplement(pSop);
             if (abc::Abc_SopIsConst0(pSop))
                 gate_type_ = GateType::CONST0;
             else if (abc::Abc_SopIsConst1(pSop))
                 gate_type_ = GateType::CONST1;
-            else if (abc::Abc_SopIsInv(pSop))
+            else if (pSop[0] == pSop[2]) {
+                gate_type_ = GateType::WIRE;
+            } else if (abc::Abc_SopIsInv(pSop))
                 gate_type_ = GateType::INV;
             else {
                 gate_type_ = GateType::AND;
@@ -373,22 +386,22 @@ namespace ECTL {
     }
 
     std::vector<ObjectPtr> Network::GetPrimaryInputs() {
-        assert(renewed);
+        assert(renewed_);
         return pis_;
     }
 
     std::vector<ObjectPtr> Network::GetPrimaryOutputs() {
-        assert(renewed);
+        assert(renewed_);
         return pos_;
     }
 
     std::vector<ObjectPtr> Network::GetNodes() {
-        assert(renewed);
+        assert(renewed_);
         return nodes_;
     }
 
     std::vector<ObjectPtr> Network::GetPIsNodes() {
-        assert(renewed);
+        assert(renewed_);
         std::vector<ObjectPtr> pis_nodes;
         pis_nodes.reserve(pis_.size() + nodes_.size());
         pis_nodes.insert(pis_nodes.end(), pis_.begin(), pis_.end());
@@ -397,29 +410,27 @@ namespace ECTL {
     }
 
     ObjectPtr Network::GetPrimaryInputbyName(std::string name) {
-        assert(renewed);
+        assert(renewed_);
         return GetObjbyID(abc::Abc_ObjId(abc::Abc_NtkFindCi(abc_ntk_, (char *) name.c_str())));
     }
 
     ObjectPtr Network::GetNodebyName(std::string name) {
-        assert(renewed);
+        assert(renewed_);
         return GetObjbyID(abc::Abc_ObjId(abc::Abc_NtkFindNode(abc_ntk_, (char *) name.c_str())));
     }
 
     void Network::ReplaceObj(ObjectPtr obj_old, ObjectPtr obj_new) {
         abc::Abc_ObjTransferFanout(obj_old->_Get_Abc_Obj(), obj_new->_Get_Abc_Obj());
-        renewed = false;
-
-//        obj_new->Renew();
-//        obj_old->Renew();
-//        for (const auto &fan_out : obj_new->GetFanouts())
-//            fan_out->Renew();
-//        renewed_ = true;
-        Renew();
+        renewed_ = false;
+        obj_new->Renew();
+        obj_old->Renew();
+        for (const auto &fan_out : obj_new->GetFanouts())
+            fan_out->Renew();
+        renewed_ = true;
     }
 
     void Network::RecoverObjFrom(ObjectPtr obj_bak) {
-        renewed = false;
+        renewed_ = false;
 
         for (const auto &fan_out_bak : obj_bak->GetFanouts()) {
             auto abc_fan_out = GetObjbyID(fan_out_bak->GetID())->_Get_Abc_Obj();
@@ -429,22 +440,29 @@ namespace ECTL {
                 auto abc_fan_in = GetObjbyID(fan_in_bak->GetID())->_Get_Abc_Obj();
                 abc::Abc_ObjAddFanin(abc_fan_out, abc_fan_in);
             }
+            GetObjbyID(fan_out_bak->GetID())->Renew();
         }
+        GetObjbyID(obj_bak->GetID())->Renew();
 
-        Renew();
+        renewed_ = true;
     }
 
     void Network::DeleteObj(ObjectPtr obj) {
         abc::Abc_NtkDeleteObj(obj->_Get_Abc_Obj());
-        renewed = false;
-        Renew();
+        renewed_ = false;
+        for (const auto &fan_in : obj->GetFanouts())
+            fan_in->Renew();
+        for (const auto &fan_out : obj->GetFanouts())
+            fan_out->Renew();
+        obj.reset();
+        renewed_ = true;
     }
 
     ObjectPtr Network::CreateInverter(ObjectPtr fan_in) {
         auto abc_inv = abc::Abc_NtkCreateNodeInv(abc_ntk_, fan_in->_Get_Abc_Obj());
-        renewed = false;
+        renewed_ = false;
         _AddAbcObject(abc_inv);
-        renewed = true;
+        renewed_ = true;
         return GetObjbyID(abc::Abc_ObjId(abc_inv));
     }
 
@@ -465,11 +483,13 @@ namespace ECTL {
             if (obj != nullptr) {
                 obj->Renew();
             }
-        renewed = true;
+        renewed_ = true;
     }
 
     ObjectPtr Network::_AddAbcObject(abc::Abc_Obj_t *abc_obj, bool renew) {
         auto obj = std::make_shared<Object>(abc_obj, shared_from_this());
+        if (abc::Abc_ObjId(abc_obj) > objs_.size() - 1)
+            objs_.resize(objs_.size() * 2, nullptr);
         objs_.at(abc::Abc_ObjId(abc_obj)) = obj;
         if (abc::Abc_ObjIsNode(abc_obj))
             nodes_.push_back(obj);
@@ -482,9 +502,9 @@ namespace ECTL {
         return obj;
     }
 
-    Network::Network() : renewed(false) {};
+    Network::Network() : renewed_(false) {};
 
-    Network::Network(abc::Abc_Ntk_t *abc_ntk) : abc_ntk_(abc_ntk), renewed(false) {}
+    Network::Network(abc::Abc_Ntk_t *abc_ntk) : abc_ntk_(abc_ntk), renewed_(false) {}
 
     Network::~Network() { abc::Abc_NtkDelete(abc_ntk_); }
 }

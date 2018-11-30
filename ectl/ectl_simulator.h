@@ -7,12 +7,12 @@
 #include <ectl_utils.h>
 
 namespace ECTL {
-    double SimErrorRate(const NetworkPtr &origin, const NetworkPtr &approx, bool show_progress_bar = false,
-                        int sim_time = 100000);
+    double _SimER(const NetworkPtr &origin, const NetworkPtr &approx, bool show_progress_bar = false, int sim_time = 100000);
 
-    std::unordered_map<ObjectPtr, std::vector<int>> SimTruthVector(const NetworkPtr &ntk,
-                                                                   bool show_progress_bar = false,
-                                                                   int sim_time = 100000);
+    double SimER(const NetworkPtr &origin, const NetworkPtr &approx, bool show_progress_bar = false, int sim_time = 100000);
+
+    std::unordered_map<ObjectPtr, std::vector<int>>
+    SimTruthVec(const NetworkPtr &ntk, bool show_progress_bar = false, int sim_time = 100000);
 
     void SimTest(NetworkPtr ntk);
 }

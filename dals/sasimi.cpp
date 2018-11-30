@@ -38,8 +38,7 @@ std::vector<Candidate> SASIMI::GetLegalCands(const ObjectPtr &target_node) {
     return legal_cands_.at(target_node);
 }
 
-std::vector<Candidate>
-SASIMI::GetBestCands(const std::vector<ObjectPtr> &target_nodes, bool real_error, bool show_progress_bar) {
+std::vector<Candidate> SASIMI::GetBestCands(const std::vector<ObjectPtr> &target_nodes, bool real_error, bool show_progress_bar) {
     GenerateLegalCands(target_nodes);
     std::vector<Candidate> best_cands;
     if (!real_error) GenerateTruthVector();
@@ -61,7 +60,7 @@ SASIMI::GetBestCands(const std::vector<ObjectPtr> &target_nodes, bool real_error
             t_cand.SetComplemented(false);
             if (real_error) {
                 t_cand.Do();
-                error_0 = SimErrorRate(ntk_bak_, ntk_, false, 100);
+                error_0 = SimER(ntk_bak_, ntk_, false, 1000);
                 t_cand.Recover();
             } else
                 error_0 = EstSubPairError(t_cand.GetTarget(), t_cand.GetSubstitute());
@@ -70,7 +69,7 @@ SASIMI::GetBestCands(const std::vector<ObjectPtr> &target_nodes, bool real_error
                 t_cand.SetComplemented(true);
                 if (real_error) {
                     t_cand.Do();
-                    error_1 = SimErrorRate(ntk_bak_, ntk_, false, 100);
+                    error_1 = SimER(ntk_bak_, ntk_, false, 1000);
                     t_cand.Recover();
                 } else
                     error_1 = 1 - EstSubPairError(t_cand.GetTarget(), t_cand.GetSubstitute());
@@ -88,14 +87,14 @@ SASIMI::GetBestCands(const std::vector<ObjectPtr> &target_nodes, bool real_error
             }
 
         }
+//        std::cout << best_cand.GetTarget()->GetName() << " " << std::flush;
         best_cands.push_back(best_cand);
     }
     return best_cands;
 }
 
-
 void SASIMI::GenerateTruthVector() {
-    truth_vec_ = SimTruthVector(ntk_);
+    truth_vec_ = SimTruthVec(ntk_);
 }
 
 void SASIMI::GenerateLegalCands(const std::vector<ObjectPtr> &target_nodes) {

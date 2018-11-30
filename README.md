@@ -192,12 +192,12 @@ auto sub_inv = approx_ntk->CreateInverter(sub_node);
 
 approx_ntk->ReplaceObj(target_node, sub_inv);
 
-std::cout << SimErrorRate(origin_ntk, approx_ntk, true);
+std::cout << SimER(origin_ntk, approx_ntk, true);
 
 approx_ntk->DeleteObj(sub_inv);
 approx_ntk->RecoverObjFrom(target_node_bak);
 
-std::cout << SimErrorRate(origin_ntk, approx_ntk, true);
+std::cout << SimER(origin_ntk, approx_ntk, true);
 ```
 
 ## Reference

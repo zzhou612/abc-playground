@@ -16,7 +16,7 @@ using namespace ECTL;
 int main() {
     path project_source_dir(PROJECT_SOURCE_DIR);
     path benchmark_dir = project_source_dir / "benchmark";
-    path benchmark_path = benchmark_dir / "C880.blif";
+    path benchmark_path = benchmark_dir / "C499.blif";
     path test_path = benchmark_dir / "out.blif";
 
     boost::timer::cpu_timer timer;
@@ -36,8 +36,8 @@ int main() {
                 critical_nodes.push_back(node);
         SASIMI sasimi;
         sasimi.LoadNetwork(ntk_approx);
-        sasimi.GenerateTruthVector();
-        auto cands = sasimi.GetBestCands(critical_nodes, false, true);
+//        sasimi.GenerateTruthVector();
+        auto cands = sasimi.GetBestCands(critical_nodes, true, true);
         std::unordered_map<ObjectPtr, double> node_error;
         for (const auto &cand : cands)
             node_error.emplace(cand.GetTarget(), cand.GetError());
@@ -53,7 +53,7 @@ int main() {
         }
         std::cout << std::endl;
         PrintKMostCriticalPaths(ntk_approx, 1);
-        error_rate = SimErrorRate(ntk_origin, ntk_approx);
+        error_rate = SimER(ntk_origin, ntk_approx);
         std::cout << "Error Rate: " << error_rate << std::endl;
         std::cout << std::endl << std::endl << std::endl;
     }
@@ -62,13 +62,3 @@ int main() {
 
     return 0;
 }
-//    for (auto &cand : sasimi.GetBestCands(critical_nodes, false, true)) {
-//        std::cout << std::left << std::setw(30) << cand.GetTarget()->GetName() + "-->" + cand.GetSubstitute()->GetName() << "   "
-//                  << time_objs.at(cand.GetTarget()).arrival_time << " : " << cand.GetError() << " : ";
-////        std::cout << std::endl;
-//        cand.GenTargetBak(ntk_origin);
-//        cand.Do();
-//        std::cout << SimErrorRate(ntk_origin, ntk_approx);
-//        std::cout << std::endl;
-//        cand.Recover();
-//    }
