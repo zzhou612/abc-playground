@@ -194,7 +194,7 @@ int PrintKMostCriticalPaths(const NtkPtr &ntk, int k, bool show_slack) {
 
     std::priority_queue<PartialPath, std::vector<PartialPath>, decltype(comp)> paths(comp);
 
-    for (auto node : ntk->GetPrimaryInputs())
+    for (auto node : ntk->GetPIs())
         paths.emplace(node, max_delay_to_sink.at(node));
 
     while (!paths.empty() && k > 0) {
@@ -256,7 +256,7 @@ std::vector<Path> GetKMostCriticalPaths(const NtkPtr &ntk, int k) {
 
     std::priority_queue<PartialPath, std::vector<PartialPath>, decltype(comp)> paths(comp);
 
-    for (auto node : ntk->GetPrimaryInputs())
+    for (auto node : ntk->GetPIs())
         paths.emplace(node, max_delay_to_sink.at(node));
 
     while (!paths.empty() && (k == -1 || k > 0)) {

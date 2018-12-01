@@ -23,8 +23,8 @@ namespace ECTL {
         for (int _ = 0; _ < sim_time; ++_) {
             if (show_progress_bar)
                 ++(*pd);
-            auto origin_pis = origin_ntk->GetPrimaryInputs();
-            auto approx_pis = approx_ntk->GetPrimaryInputs();
+            auto origin_pis = origin_ntk->GetPIs();
+            auto approx_pis = approx_ntk->GetPIs();
 
             for (int i = 0; i < (int) origin_pis.size(); i++) {
                 int rand_val = dice();
@@ -35,17 +35,17 @@ namespace ECTL {
             for (const auto &obj : TopologicalSort(origin_ntk))
                 if (obj->IsNode())
                     obj->_SopSimulate();
-            for (const auto &po : origin_ntk->GetPrimaryOutputs())
+            for (const auto &po : origin_ntk->GetPOs())
                 po->SetiTemp(po->GetFanin0()->GetiTemp());
 
             for (const auto &obj : TopologicalSort(approx_ntk))
                 if (obj->IsNode())
                     obj->_SopSimulate();
-            for (const auto &po : approx_ntk->GetPrimaryOutputs())
+            for (const auto &po : approx_ntk->GetPOs())
                 po->SetiTemp(po->GetFanin0()->GetiTemp());
 
-            auto origin_pos = origin_ntk->GetPrimaryOutputs();
-            auto approx_pos = approx_ntk->GetPrimaryOutputs();
+            auto origin_pos = origin_ntk->GetPOs();
+            auto approx_pos = approx_ntk->GetPOs();
 
             for (int i = 0; i < (int) origin_pos.size(); i++) {
                 if (origin_pos[i]->GetiTemp() != approx_pos[i]->GetiTemp()) {
@@ -74,8 +74,8 @@ namespace ECTL {
         for (int _ = 0; _ < sim_time / 64; ++_) {
             if (show_progress_bar)
                 ++(*pd);
-            auto origin_pis = origin_ntk->GetPrimaryInputs();
-            auto approx_pis = approx_ntk->GetPrimaryInputs();
+            auto origin_pis = origin_ntk->GetPIs();
+            auto approx_pis = approx_ntk->GetPIs();
 
             for (int i = 0; i < (int) origin_pis.size(); i++) {
                 uint64_t rand_val = dice();
@@ -86,17 +86,17 @@ namespace ECTL {
             for (const auto &obj : TopologicalSort(origin_ntk))
                 if (obj->IsNode())
                     obj->Simulate();
-            for (const auto &po : origin_ntk->GetPrimaryOutputs())
+            for (const auto &po : origin_ntk->GetPOs())
                 po->SetVal(po->GetFanin0()->GetVal());
 
             for (const auto &obj : TopologicalSort(approx_ntk))
                 if (obj->IsNode())
                     obj->Simulate();
-            for (const auto &po : approx_ntk->GetPrimaryOutputs())
+            for (const auto &po : approx_ntk->GetPOs())
                 po->SetVal(po->GetFanin0()->GetVal());
 
-            auto origin_pos = origin_ntk->GetPrimaryOutputs();
-            auto approx_pos = approx_ntk->GetPrimaryOutputs();
+            auto origin_pos = origin_ntk->GetPOs();
+            auto approx_pos = approx_ntk->GetPOs();
 
             uint64_t res = 0;
             for (int i = 0; i < (int) origin_pos.size(); i++) {
@@ -111,7 +111,7 @@ namespace ECTL {
         std::unordered_map<ObjPtr, std::vector<int>> truth_vec;
 //        truth_vec.reserve(ntk->GetPIsNodes().size());
         for (const auto &obj : ntk->GetObjs())
-            if (obj && (obj->IsPrimaryInput() || obj->IsNode())) {
+            if (obj->IsPrimaryInput() || obj->IsNode()) {
                 truth_vec.emplace(obj, std::vector<int>());
                 truth_vec.at(obj).reserve(sim_time);
             }
@@ -127,7 +127,7 @@ namespace ECTL {
         for (int _ = 0; _ < sim_time; ++_) {
             if (show_progress_bar)
                 ++(*pd);
-            auto origin_pis = ntk->GetPrimaryInputs();
+            auto origin_pis = ntk->GetPIs();
 
             for (const auto &obj : TopologicalSort(ntk)) {
                 if (obj->IsPrimaryInput()) {

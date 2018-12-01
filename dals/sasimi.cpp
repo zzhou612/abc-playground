@@ -10,7 +10,7 @@ void SASIMI::LoadNetwork(const NtkPtr &ntk) {
 
 void SASIMI::InitFaninCones(bool print_result) {
     for (const auto &obj : ntk_->GetObjs())
-        if (obj && obj->IsNode()) {
+        if (obj->IsNode()) {
             fan_in_cones_.emplace(obj->GetID(), FaninCone());
             fan_in_cones_.at(obj->GetID()).insert(obj->GetID());
         }

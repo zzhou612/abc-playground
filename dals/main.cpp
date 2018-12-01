@@ -1,5 +1,5 @@
 #include <iostream>
-#include<iomanip>
+#include <iomanip>
 #include <vector>
 #include <map>
 #include <unordered_set>

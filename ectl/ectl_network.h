@@ -111,9 +111,9 @@ namespace ECTL {
 
         std::vector<ObjPtr> GetObjs();
 
-        std::vector<ObjPtr> GetPrimaryInputs();
+        std::vector<ObjPtr> GetPIs();
 
-        std::vector<ObjPtr> GetPrimaryOutputs();
+        std::vector<ObjPtr> GetPOs();
 
         ObjPtr GetObjbyID(int id);
 

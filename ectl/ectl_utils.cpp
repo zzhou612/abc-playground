@@ -122,7 +122,7 @@ namespace ECTL {
         }
         Vec_PtrFree(abc_objs);
 
-        auto pis = ntk->GetPrimaryInputs();
+        auto pis = ntk->GetPIs();
         sorted_objs.insert(sorted_objs.begin(),
                            std::make_move_iterator(pis.begin()),
                            std::make_move_iterator(pis.end()));

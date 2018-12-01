@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <ectl_network.h>
 
 namespace abc {
@@ -382,15 +383,17 @@ namespace ECTL {
     ObjPtr Network::GetObjbyID(int id) { return objs_.at((unsigned) id); }
 
     std::vector<ObjPtr> Network::GetObjs() {
-        return objs_;
+        std::vector<ObjPtr> objs;
+        std::copy_if(objs_.begin(), objs_.end(), back_inserter(objs), [](const ObjPtr obj) { return obj != nullptr; });
+        return objs;
     }
 
-    std::vector<ObjPtr> Network::GetPrimaryInputs() {
+    std::vector<ObjPtr> Network::GetPIs() {
         assert(renewed_);
         return pis_;
     }
 
-    std::vector<ObjPtr> Network::GetPrimaryOutputs() {
+    std::vector<ObjPtr> Network::GetPOs() {
         assert(renewed_);
         return pos_;
     }
