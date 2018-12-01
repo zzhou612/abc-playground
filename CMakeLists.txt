@@ -11,7 +11,11 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     include_directories(/usr/local/include)
 endif ()
 
-add_subdirectory(ext-lib)
+# compile abc with namespace
+set(ABC_USE_NAMESPACE abc)
+set(abc_include ${PROJECT_SOURCE_DIR}/abc/src)
+
+add_subdirectory(abc EXCLUDE_FROM_ALL)
 add_subdirectory(ectl)
 add_subdirectory(playground)
 add_subdirectory(dals)
