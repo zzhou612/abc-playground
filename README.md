@@ -49,7 +49,7 @@ ABC has already provided `CMakeLists.txt` to support the use of CLion. Just clon
 git clone https://github.com/berkeley-abc/abc.git
 ```
 
-Then add the following lines to the `CMakeLists.txt` of the project to ensure that ABC is compiled as C++ code with namespaces
+Then add the following lines to the `CMakeLists.txt` of the project to ensure that ABC is compiled as C++ code with namespaces.
 
 ```cmake
 set(ABC_USE_NAMESPACE abc)
