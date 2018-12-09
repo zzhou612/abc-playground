@@ -39,16 +39,25 @@ sudo apt install libboost-all-dev
 
 
 - ectl: ECTL library (under development)
-- ext-lib: external libraries
-  - include: header files
-  - lib: built static library files
+- abc: source codes of Berkeley ABC
 - playground: demos
 
 ### Install ABC
 
-By building `install_abc` in `ext-lib` subdirectory, the source codes of ABC will be automatically pulled and compiled from the official Github repository. All the header files will be injected into `ext-lib/include`. The static library `libabc.a` will be put into `ext-lib/lib`.
+ABC has already provided `CMakeLists.txt` to support the use of CLion. Just clone the official ABC GitHub repository to the local directory.
+```bash
+git clone https://github.com/berkeley-abc/abc.git
+```
 
-For Darwin based operating system (macOS), ABC is compiled by `g++-6`. For Linux, the compiler is  `g++`. ABC is compiled as C++ code with namespace `abc`. For details on the compilation and installation of ABC, please check the corresponding `CMakeLists` file and `externalproject_add` configuration.
+Then add the following lines to the `CMakeLists.txt` of the project to ensure that ABC is compiled as C++ code with namespaces
+
+```cmake
+set(ABC_USE_NAMESPACE abc)
+set(abc_include ${PROJECT_SOURCE_DIR}/abc/src)
+add_subdirectory(abc EXCLUDE_FROM_ALL)
+```
+
+Finally, link some target to `libabc`, like `abc_playground`, CMake will build `libabc` and use it automatically.
 
 ### ABC Basics
 
